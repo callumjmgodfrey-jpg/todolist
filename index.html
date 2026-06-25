@@ -298,6 +298,20 @@
     /* NOTIF */
     .notif-section{max-width:440px;}
 
+    /* LOCK SCREEN */
+    #lock-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
+    .lock-logo{font-size:2.5rem;font-weight:800;color:var(--accent);}
+    .lock-sub{font-size:.9rem;color:var(--text-2);}
+    .pin-dots{display:flex;gap:14px;margin:8px 0;}
+    .pin-dot{width:16px;height:16px;border-radius:50%;background:var(--border);}
+    .pin-dot.filled{background:var(--accent);}
+    .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:220px;}
+    .pin-key{background:var(--surface);border:1px solid var(--border);border-radius:12px;height:60px;font-size:1.3rem;font-weight:700;cursor:pointer;color:var(--text);transition:all .1s;}
+    .pin-key:hover{background:var(--accent-light);border-color:var(--accent);}
+    .pin-key:active{transform:scale(.95);}
+    .pin-key.del{font-size:1rem;color:var(--text-2);}
+    .pin-error{color:var(--danger);font-size:.85rem;font-weight:600;min-height:20px;}
+
     /* PRINT */
     @media print{.hdr,.fab,#timer-bar,#focus-overlay,#search-overlay,.modal-overlay,.form-card{display:none!important}.main{padding:0}.tab-panel{display:block!important}}
 
@@ -314,6 +328,30 @@
   </style>
 </head>
 <body>
+
+<div id="lock-screen">
+  <div class="lock-logo">🎯 GoalDo</div>
+  <div class="lock-sub">Enter your PIN to continue</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key del" onclick="pinKey('del')" style="grid-column:1">⌫</button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <div></div>
+  </div>
+</div>
 
 <header class="hdr">
   <div class="hdr-logo">🎯 GoalDo</div>
@@ -1029,6 +1067,32 @@ function pollNotifications(){if(Notification.permission!=='granted')return;const
 
 // ─── RENDER ALL ──────────────────────────────────────────────────────────────
 function renderAll(){renderGoals();renderTasks();renderHabits();refreshGoalDrop();const active=document.querySelector('.tab-panel.active');if(active&&active.id==='tab-review')renderReview();}
+
+// ─── PIN LOCK ────────────────────────────────────────────────────────────────
+const PIN_CORRECT='1579';
+let pinEntry='';
+function pinKey(k){
+  const errEl=document.getElementById('pin-error');
+  if(k==='del'){pinEntry=pinEntry.slice(0,-1);}
+  else if(pinEntry.length<4){pinEntry+=k;}
+  // Update dots
+  for(let i=0;i<4;i++){const d=document.getElementById('d'+i);if(d)d.className='pin-dot'+(i<pinEntry.length?' filled':'');}
+  errEl.textContent='';
+  if(pinEntry.length===4){
+    if(pinEntry===PIN_CORRECT){
+      sessionStorage.setItem('gd_unlocked','1');
+      document.getElementById('lock-screen').style.display='none';
+    }else{
+      errEl.textContent='Incorrect PIN — try again';
+      pinEntry='';
+      for(let i=0;i<4;i++){const d=document.getElementById('d'+i);if(d)d.className='pin-dot';}
+    }
+  }
+}
+// Check if already unlocked this session
+if(sessionStorage.getItem('gd_unlocked')==='1'){
+  document.getElementById('lock-screen').style.display='none';
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 state=loadState();resetRecurring();snapshotToday();applyTheme(state.settings.theme||'auto');renderAll();
