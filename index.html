@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Goal-Oriented To-Do</title>
+  <title>Goal To-Do</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,10 +25,6 @@
       --warning-light: #fef3c7;
       --danger: #ef4444;
       --danger-light: #fee2e2;
-      --short-color: #0ea5e9;
-      --short-light: #e0f2fe;
-      --long-color: #8b5cf6;
-      --long-light: #ede9fe;
       --radius: 10px;
       --radius-lg: 14px;
       --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
@@ -37,20 +33,11 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #0f1117;
-        --surface: #1a1d2e;
-        --surface-2: #222639;
-        --border: #2e3250;
-        --border-strong: #404570;
-        --text: #e8eaf6;
-        --text-2: #9399b5;
-        --text-3: #5a6080;
-        --accent-light: #2a2560;
-        --success-light: #14532d;
-        --warning-light: #451a03;
-        --danger-light: #450a0a;
-        --short-light: #0c4a6e;
-        --long-light: #2e1065;
+        --bg: #0f1117; --surface: #1a1d2e; --surface-2: #222639;
+        --border: #2e3250; --border-strong: #404570;
+        --text: #e8eaf6; --text-2: #9399b5; --text-3: #5a6080;
+        --accent-light: #2a2560; --success-light: #14532d;
+        --warning-light: #451a03; --danger-light: #450a0a;
         --shadow: 0 1px 3px rgba(0,0,0,0.3);
         --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
       }
@@ -65,530 +52,291 @@
       line-height: 1.6;
     }
 
-    /* ── Layout ── */
+    /* ── Header ── */
     .app-header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 0 24px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      height: 60px;
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; height: 60px;
     }
-
     .app-header h1 {
-      font-size: 17px;
-      font-weight: 600;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 17px; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
     }
-
-    .app-header h1 svg { color: var(--accent); }
-
-    .tab-nav {
-      display: flex;
-      gap: 4px;
-    }
-
+    .app-header h1 svg { color: var(--accent); flex-shrink: 0; }
+    .tab-nav { display: flex; gap: 2px; }
     .tab-btn {
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      color: var(--text-2);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
+      padding: 6px 13px; border-radius: 8px; border: none;
+      background: transparent; color: var(--text-2); font-size: 13px;
+      font-weight: 500; cursor: pointer; font-family: inherit;
       transition: background 0.15s, color 0.15s;
     }
-
     .tab-btn:hover { background: var(--surface-2); color: var(--text); }
     .tab-btn.active { background: var(--accent-light); color: var(--accent); }
 
-    .main {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 28px 20px 60px;
-    }
-
+    /* ── Layout ── */
+    .main { max-width: 860px; margin: 0 auto; padding: 28px 20px 80px; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
-
-    /* ── Cards & Sections ── */
+    .section-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .section-title {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--text-3);
-      margin-bottom: 12px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 12px;
     }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
 
+    /* ── Cards ── */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      box-shadow: var(--shadow);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow);
     }
-
     .card + .card { margin-top: 12px; }
 
     /* ── Forms ── */
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+    .form-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .form-row, .form-row-3 { grid-template-columns: 1fr; } }
 
-    @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
+    .field { display: flex; flex-direction: column; gap: 5px; }
     .field label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-2);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-size: 11px; font-weight: 700; color: var(--text-2);
+      text-transform: uppercase; letter-spacing: 0.06em;
     }
-
-    input[type="text"],
-    input[type="date"],
-    select,
-    textarea {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 9px 13px;
-      color: var(--text);
-      font-size: 14px;
-      font-family: inherit;
-      width: 100%;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      -webkit-appearance: none;
+    input[type="text"], input[type="date"], input[type="time"], select, textarea {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 9px 13px; color: var(--text);
+      font-size: 14px; font-family: inherit; width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none;
     }
-
     input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--accent);
+      outline: none; border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
     }
-
     textarea { resize: vertical; min-height: 60px; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
+    /* ── Buttons ── */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 9px 18px;
-      border-radius: var(--radius);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-      white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 9px 18px; border-radius: var(--radius); font-size: 14px;
+      font-weight: 500; cursor: pointer; border: 1px solid transparent;
+      transition: background 0.15s, transform 0.1s; white-space: nowrap; font-family: inherit;
     }
-
     .btn:active { transform: scale(0.97); }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent-dark);
-    }
-
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent-dark); }
     .btn-primary:hover { background: var(--accent-dark); }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-2);
-      border-color: var(--border);
-    }
-
+    .btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border); }
     .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
-
-    .btn-sm { padding: 5px 11px; font-size: 13px; border-radius: 7px; }
-
-    .btn-danger { background: var(--danger-light); color: var(--danger); border-color: transparent; }
-    .btn-danger:hover { background: var(--danger); color: #fff; }
-
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    /* ── Progress Bar ── */
-    .progress-wrap {
-      margin-top: 10px;
-    }
-
-    .progress-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-
-    .progress-label {
-      font-size: 12px;
-      color: var(--text-2);
-    }
-
-    .progress-pct {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-
-    .progress-track {
-      height: 6px;
-      background: var(--surface-2);
-      border-radius: 99px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-
-    .progress-fill {
-      height: 100%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--accent) 0%, #a78bfa 100%);
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      min-width: 0;
-    }
-
-    .progress-fill.done { background: linear-gradient(90deg, var(--success) 0%, #4ade80 100%); }
-
-    /* ── Goal Items ── */
-    .goal-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px 18px;
-      transition: box-shadow 0.15s;
-    }
-
-    .goal-item:hover { box-shadow: var(--shadow-md); }
-
-    .goal-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .goal-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      flex: 1;
-    }
-
-    .goal-desc {
-      font-size: 13px;
-      color: var(--text-2);
-      margin-top: 3px;
-      line-height: 1.5;
-    }
-
-    .goal-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 6px;
-      flex-wrap: wrap;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 9px;
-      border-radius: 99px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-    }
-
-    .badge-short { background: var(--short-light); color: var(--short-color); }
-    .badge-long  { background: var(--long-light);  color: var(--long-color);  }
-    .badge-done  { background: var(--success-light); color: var(--success); }
-
-    .goal-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 7px; }
 
     .icon-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 7px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-3);
-      transition: background 0.15s, color 0.15s;
+      width: 28px; height: 28px; border-radius: 7px; border: none;
+      background: transparent; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; color: var(--text-3);
+      transition: background 0.15s, color 0.15s; font-family: inherit;
     }
+    .icon-btn:hover         { background: var(--surface-2);  color: var(--text);    }
+    .icon-btn.delete:hover  { background: var(--danger-light); color: var(--danger);  }
+    .icon-btn.arch-btn:hover{ background: var(--warning-light);color: var(--warning); }
 
-    .icon-btn:hover { background: var(--surface-2); color: var(--text); }
-    .icon-btn.delete:hover { background: var(--danger-light); color: var(--danger); }
+    /* ── Add form slide ── */
+    .add-form-wrap { overflow: hidden; transition: max-height 0.28s ease; max-height: 0; }
+    .add-form-wrap.open { max-height: 800px; }
+    .add-form-inner { padding: 16px 0 4px; }
 
-    /* ── Task Items ── */
-    .task-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 13px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .task-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .task-item:first-child { padding-top: 0; }
-
-    .task-check {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      border: 2px solid var(--border-strong);
-      background: transparent;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1px;
-      transition: all 0.15s;
-    }
-
-    .task-check.checked {
-      background: var(--success);
-      border-color: var(--success);
-    }
-
-    .task-check.checked svg { display: block; }
-    .task-check svg { display: none; }
-
-    .task-body { flex: 1; min-width: 0; }
-
-    .task-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
-      transition: color 0.15s;
-      word-break: break-word;
-    }
-
-    .task-name.done {
-      color: var(--text-3);
-      text-decoration: line-through;
-      text-decoration-color: var(--border-strong);
-    }
-
-    .task-goal-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      color: var(--accent);
-      background: var(--accent-light);
-      padding: 1px 7px;
-      border-radius: 99px;
-      margin-top: 3px;
-    }
-
-    /* ── Notifications Panel ── */
-    .notif-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-    }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .toggle-row:last-child { border-bottom: none; }
-
-    .toggle-info h3 {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .toggle-info p {
-      font-size: 13px;
-      color: var(--text-2);
-      margin-top: 2px;
-    }
-
-    .toggle {
-      position: relative;
-      width: 44px;
-      height: 24px;
-      flex-shrink: 0;
-    }
-
-    .toggle input { opacity: 0; width: 0; height: 0; }
-
-    .toggle-track {
-      position: absolute;
-      inset: 0;
-      border-radius: 99px;
-      background: var(--border-strong);
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .toggle-track::after {
-      content: '';
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #fff;
-      top: 3px;
-      left: 3px;
-      transition: transform 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-
-    .toggle input:checked + .toggle-track { background: var(--accent); }
-    .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
-
-    .notif-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: var(--radius);
-      font-size: 13px;
-      font-weight: 500;
-      margin-top: 16px;
-    }
-
-    .notif-status.allowed  { background: var(--success-light); color: var(--success); }
-    .notif-status.denied   { background: var(--danger-light);  color: var(--danger);  }
-    .notif-status.default  { background: var(--warning-light); color: var(--warning); }
-
-    /* ── Empty States ── */
-    .empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-3);
-    }
-
-    .empty svg { opacity: 0.35; margin-bottom: 12px; }
-    .empty p { font-size: 14px; }
-
-    /* ── Misc ── */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 20px 0;
-    }
-
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
+    /* ── Stats ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    @media (max-width: 560px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
     .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      text-align: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px; text-align: center;
     }
+    .stat-num { font-size: 22px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .stat-lbl { font-size: 10px; color: var(--text-3); margin-top: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
 
-    .stat-num {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--accent);
-      line-height: 1;
+    /* ── Progress ── */
+    .progress-wrap { margin-top: 10px; }
+    .progress-meta { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .progress-label { font-size: 12px; color: var(--text-2); }
+    .progress-pct { font-size: 12px; font-weight: 700; }
+    .progress-track { height: 6px; background: var(--surface-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+    .progress-fill { height: 100%; border-radius: 99px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700;
     }
+    .badge-short { background: rgba(14,165,233,0.12); color: #0ea5e9; }
+    .badge-long  { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+    .badge-done  { background: var(--success-light); color: var(--success); }
+    .badge-arch  { background: var(--surface-2); color: var(--text-3); }
 
-    .stat-lbl {
-      font-size: 11px;
-      color: var(--text-3);
-      margin-top: 4px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+    .deadline-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 99px; }
+    .dl-ok   { background: var(--success-light); color: var(--success); }
+    .dl-soon { background: var(--warning-light); color: var(--warning); }
+    .dl-over { background: var(--danger-light);  color: var(--danger);  }
 
+    /* ── Goal items ── */
     .goal-list { display: flex; flex-direction: column; gap: 10px; }
-    .task-list { }
-
-    .filter-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
+    .goal-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left-width: 4px; border-radius: var(--radius-lg); padding: 16px 18px;
+      transition: box-shadow 0.15s;
     }
+    .goal-item:hover { box-shadow: var(--shadow-md); }
+    .goal-item.archived { opacity: 0.55; }
+    .goal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .goal-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .goal-desc  { font-size: 13px; color: var(--text-2); margin-top: 3px; line-height: 1.5; }
+    .goal-meta  { display: flex; align-items: center; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
+    .goal-actions { display: flex; gap: 3px; flex-shrink: 0; }
+    .done-count { font-size: 11px; color: var(--text-3); }
 
+    /* ── Filter row ── */
+    .filter-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
     .filter-btn {
-      padding: 5px 13px;
-      border-radius: 99px;
-      border: 1px solid var(--border);
-      background: transparent;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-2);
-      cursor: pointer;
-      transition: all 0.15s;
+      padding: 4px 12px; border-radius: 99px; border: 1px solid var(--border);
+      background: transparent; font-size: 12px; font-weight: 600; color: var(--text-2);
+      cursor: pointer; transition: all 0.15s; font-family: inherit;
     }
-
-    .filter-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
     .filter-btn:hover:not(.active) { background: var(--surface-2); }
 
-    .add-form-wrap {
-      overflow: hidden;
-      transition: max-height 0.25s ease;
-      max-height: 0;
+    /* ── Task items ── */
+    .task-item { border-bottom: 1px solid var(--border); }
+    .task-item:last-child { border-bottom: none; }
+    .task-item.drag-over { border-top: 2px solid var(--accent); }
+
+    .task-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 2px; }
+    .drag-handle {
+      cursor: grab; color: var(--text-3); flex-shrink: 0; user-select: none;
+      font-size: 15px; margin-top: 3px; padding: 0 2px; transition: color 0.15s;
+    }
+    .drag-handle:hover { color: var(--text-2); }
+    .drag-handle:active { cursor: grabbing; }
+
+    .task-check {
+      width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border-strong);
+      background: transparent; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px; transition: all 0.15s; font-family: inherit;
+    }
+    .task-check.checked { background: var(--success); border-color: var(--success); }
+    .task-check svg { display: none; }
+    .task-check.checked svg { display: block; }
+
+    .task-body { flex: 1; min-width: 0; }
+    .task-name { font-size: 14px; font-weight: 500; color: var(--text); word-break: break-word; }
+    .task-name.done { color: var(--text-3); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+
+    .task-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+    .task-goal-tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 99px;
+    }
+    .recur-tag {
+      font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+      background: var(--accent-light); color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .task-right { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+
+    .expand-btn {
+      width: 26px; height: 26px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; color: var(--text-3);
+      transition: background 0.15s, color 0.15s, transform 0.2s; font-family: inherit;
+    }
+    .expand-btn:hover { background: var(--surface-2); color: var(--text); }
+    .expand-btn.open { transform: rotate(180deg); }
+
+    /* ── Expanded task detail ── */
+    .task-detail { padding: 0 4px 12px 36px; display: none; }
+    .task-detail.open { display: block; }
+    .task-notes { font-size: 13px; margin-bottom: 10px; min-height: 52px; padding: 8px 10px; border-radius: 8px; }
+
+    .subtask-list { margin-bottom: 8px; }
+    .subtask-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    .subtask-check {
+      width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-strong);
+      background: transparent; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .subtask-check.checked { background: var(--success); border-color: var(--success); }
+    .subtask-check svg { display: none; }
+    .subtask-check.checked svg { display: block; }
+    .subtask-text { font-size: 13px; color: var(--text-2); flex: 1; }
+    .subtask-text.done { text-decoration: line-through; color: var(--text-3); }
+
+    .add-sub-row { display: flex; gap: 6px; margin-top: 6px; }
+    .add-sub-row input { font-size: 13px; padding: 6px 10px; }
+
+    /* ── Review tab ── */
+    .review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 560px) { .review-grid { grid-template-columns: 1fr; } }
+
+    .streak-block { text-align: center; padding: 24px 16px; }
+    .streak-num { font-size: 52px; font-weight: 800; color: var(--accent); line-height: 1; }
+    .streak-sub  { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+    .streak-best { font-size: 12px; color: var(--text-3); margin-top: 6px; }
+
+    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0; }
+    .day-cell {
+      aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .day-lbl { font-size: 9px; font-weight: 700; opacity: 0.7; margin-bottom: 2px; text-transform: uppercase; }
+    .day-num { font-size: 13px; font-weight: 700; }
+    .day-none  { background: var(--surface-2); color: var(--text-3); }
+    .day-some  { background: #bbf7d0; color: #166534; }
+    .day-all   { background: #22c55e; color: #fff; }
+    .day-today { outline: 2px solid var(--accent); outline-offset: 1px; }
+    @media (prefers-color-scheme: dark) {
+      .day-some { background: #14532d; color: #86efac; }
+      .day-all  { background: #166534; color: #bbf7d0; }
     }
 
-    .add-form-wrap.open { max-height: 600px; }
+    /* ── Notifications ── */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-of-type { border-bottom: none; }
+    .toggle-info h3 { font-size: 15px; font-weight: 600; }
+    .toggle-info p  { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track { position: absolute; inset: 0; border-radius: 99px; background: var(--border-strong); cursor: pointer; transition: background 0.2s; }
+    .toggle-track::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle input:checked + .toggle-track { background: var(--accent); }
+    .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+    .notif-status { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 500; margin-top: 16px; }
+    .ns-ok   { background: var(--success-light); color: var(--success); }
+    .ns-deny { background: var(--danger-light);  color: var(--danger); }
+    .ns-warn { background: var(--warning-light); color: var(--warning); }
 
-    .add-form-inner {
-      padding: 16px 0 4px;
-    }
+    /* ── Empty state ── */
+    .empty { text-align: center; padding: 40px 20px; color: var(--text-3); }
+    .empty svg { opacity: 0.3; }
+    .empty p { font-size: 14px; margin-top: 10px; }
 
-    .done-count {
-      font-size: 12px;
-      color: var(--text-3);
+    /* ── Print ── */
+    @media print {
+      .tab-nav, .add-form-wrap, .filter-row, .section-bar button,
+      .goal-actions, .task-right, .drag-handle, #tab-reminders, #rv-export { display: none !important; }
+      body { background: white; color: black; font-size: 12px; }
+      .tab-panel { display: block !important; page-break-after: always; }
+      .goal-item, .task-item, .card { break-inside: avoid; box-shadow: none; border-color: #ccc !important; }
+      .main { padding: 0; max-width: 100%; }
+      .app-header { position: relative; }
     }
 
     @media (max-width: 600px) {
-      .app-header { padding: 0 16px; }
+      .app-header { padding: 0 14px; }
       .app-header h1 span { display: none; }
-      .main { padding: 20px 14px 60px; }
-      .stats-row { grid-template-columns: repeat(3, 1fr); }
+      .main { padding: 18px 14px 80px; }
+      .tab-btn { padding: 5px 9px; font-size: 12px; }
     }
   </style>
 </head>
@@ -599,68 +347,68 @@
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
     </svg>
-    <span>Goal-Oriented To-Do</span>
+    <span>Goal To-Do</span>
   </h1>
-  <nav class="tab-nav" role="tablist" aria-label="Main navigation">
-    <button class="tab-btn active" data-tab="goals" role="tab" aria-selected="true">Goals</button>
-    <button class="tab-btn" data-tab="tasks" role="tab" aria-selected="false">Tasks</button>
-    <button class="tab-btn" data-tab="reminders" role="tab" aria-selected="false">Reminders</button>
+  <nav class="tab-nav" role="tablist" aria-label="App sections">
+    <button class="tab-btn active" data-tab="goals"     role="tab" aria-selected="true">Goals</button>
+    <button class="tab-btn"        data-tab="tasks"     role="tab" aria-selected="false">Tasks</button>
+    <button class="tab-btn"        data-tab="review"    role="tab" aria-selected="false">Review</button>
+    <button class="tab-btn"        data-tab="reminders" role="tab" aria-selected="false">Reminders</button>
   </nav>
 </header>
 
-<main class="main" id="main">
+<main class="main">
 
-  <!-- ══ GOALS TAB ══ -->
+  <!-- ═══ GOALS ═══ -->
   <section class="tab-panel active" id="tab-goals" role="tabpanel">
-
-    <div class="stats-row" id="goal-stats">
-      <div class="stat-card">
-        <div class="stat-num" id="stat-goals">0</div>
-        <div class="stat-lbl">Total Goals</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="stat-short">0</div>
-        <div class="stat-lbl">Short-Term</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="stat-long">0</div>
-        <div class="stat-lbl">Long-Term</div>
-      </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="sg-total">0</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-card"><div class="stat-num" id="sg-short">0</div><div class="stat-lbl">Short-Term</div></div>
+      <div class="stat-card"><div class="stat-num" id="sg-long">0</div><div class="stat-lbl">Long-Term</div></div>
+      <div class="stat-card"><div class="stat-num" id="sg-arch">0</div><div class="stat-lbl">Archived</div></div>
     </div>
 
-    <!-- Add goal form toggle -->
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-      <p class="section-title" style="margin:0">Your Goals</p>
+    <div class="section-bar">
+      <p class="section-title" style="margin:0">Your goals</p>
       <button class="btn btn-primary btn-sm" id="add-goal-toggle" aria-expanded="false">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Goal
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Goal
       </button>
     </div>
 
     <div class="add-form-wrap" id="goal-form-wrap">
       <div class="card add-form-inner">
-        <div class="form-row" style="margin-bottom:12px;">
-          <div class="field" style="grid-column: span 2;">
-            <label for="goal-title">Goal title</label>
-            <input type="text" id="goal-title" placeholder="e.g. Run a 5K race" maxlength="100" />
-          </div>
+        <div class="field" style="margin-bottom:12px">
+          <label for="g-title">Goal title</label>
+          <input type="text" id="g-title" placeholder="e.g. Run a 5K race" maxlength="100" />
         </div>
-        <div class="form-row" style="margin-bottom:12px;">
+        <div class="form-row-3" style="margin-bottom:12px">
           <div class="field">
-            <label for="goal-type">Category</label>
-            <select id="goal-type">
+            <label for="g-type">Type</label>
+            <select id="g-type">
               <option value="short">Short-Term</option>
               <option value="long">Long-Term</option>
             </select>
           </div>
           <div class="field">
-            <label for="goal-deadline">Target date (optional)</label>
-            <input type="date" id="goal-deadline" />
+            <label for="g-cat">Category</label>
+            <select id="g-cat">
+              <option value="health">🏃 Health</option>
+              <option value="career">💼 Career</option>
+              <option value="finance">💰 Finance</option>
+              <option value="personal">🏠 Personal</option>
+              <option value="learning">📚 Learning</option>
+              <option value="other">⭐ Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="g-deadline">Target date</label>
+            <input type="date" id="g-deadline" />
           </div>
         </div>
         <div class="field">
-          <label for="goal-desc">Description (optional)</label>
-          <textarea id="goal-desc" placeholder="Why does this goal matter to you?" rows="2"></textarea>
+          <label for="g-desc">Description (optional)</label>
+          <textarea id="g-desc" placeholder="Why does this goal matter?" rows="2"></textarea>
         </div>
         <div class="form-actions">
           <button class="btn btn-ghost" id="cancel-goal">Cancel</button>
@@ -669,63 +417,61 @@
       </div>
     </div>
 
-    <!-- Filter -->
     <div class="filter-row" role="group" aria-label="Filter goals">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="short">Short-Term</button>
-      <button class="filter-btn" data-filter="long">Long-Term</button>
-      <button class="filter-btn" data-filter="done">Completed</button>
+      <button class="filter-btn active" data-gf="all">All</button>
+      <button class="filter-btn" data-gf="short">Short-Term</button>
+      <button class="filter-btn" data-gf="long">Long-Term</button>
+      <button class="filter-btn" data-gf="done">Completed</button>
+      <button class="filter-btn" data-gf="archived">Archived</button>
     </div>
 
-    <div class="goal-list" id="goal-list" aria-live="polite">
-      <!-- rendered by JS -->
-    </div>
-
+    <div class="goal-list" id="goal-list" aria-live="polite"></div>
   </section>
 
-  <!-- ══ TASKS TAB ══ -->
+  <!-- ═══ TASKS ═══ -->
   <section class="tab-panel" id="tab-tasks" role="tabpanel">
-
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-num" id="stat-tasks">0</div>
-        <div class="stat-lbl">Total Tasks</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="stat-done">0</div>
-        <div class="stat-lbl">Completed</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="stat-pending">0</div>
-        <div class="stat-lbl">Remaining</div>
-      </div>
+      <div class="stat-card"><div class="stat-num" id="st-total">0</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-done">0</div><div class="stat-lbl">Done</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-pending">0</div><div class="stat-lbl">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-streak">0</div><div class="stat-lbl">Day Streak 🔥</div></div>
     </div>
 
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-      <p class="section-title" style="margin:0">Daily Tasks</p>
+    <div class="section-bar">
+      <p class="section-title" style="margin:0">Daily tasks</p>
       <button class="btn btn-primary btn-sm" id="add-task-toggle" aria-expanded="false">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Task
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Task
       </button>
     </div>
 
     <div class="add-form-wrap" id="task-form-wrap">
       <div class="card add-form-inner">
-        <div class="field" style="margin-bottom:12px;">
-          <label for="task-name">Task</label>
-          <input type="text" id="task-name" placeholder="e.g. Go for a 30-min jog" maxlength="120" />
+        <div class="field" style="margin-bottom:12px">
+          <label for="t-name">Task name</label>
+          <input type="text" id="t-name" placeholder="e.g. Go for a 30-min jog" maxlength="120" />
         </div>
-        <div class="form-row">
+        <div class="form-row-3" style="margin-bottom:12px">
           <div class="field">
-            <label for="task-goal">Link to goal (optional)</label>
-            <select id="task-goal">
-              <option value="">— No goal —</option>
+            <label for="t-goal">Link to goal</label>
+            <select id="t-goal"><option value="">— No goal —</option></select>
+          </div>
+          <div class="field">
+            <label for="t-date">Due date</label>
+            <input type="date" id="t-date" />
+          </div>
+          <div class="field">
+            <label for="t-recur">Recurring</label>
+            <select id="t-recur">
+              <option value="none">One-time</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
             </select>
           </div>
-          <div class="field">
-            <label for="task-date">Due date (optional)</label>
-            <input type="date" id="task-date" />
-          </div>
+        </div>
+        <div class="field">
+          <label for="t-notes">Notes (optional)</label>
+          <textarea id="t-notes" placeholder="Extra context, links, sub-steps..." rows="2"></textarea>
         </div>
         <div class="form-actions">
           <button class="btn btn-ghost" id="cancel-task">Cancel</button>
@@ -735,581 +481,864 @@
     </div>
 
     <div class="filter-row" role="group" aria-label="Filter tasks">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="pending">Pending</button>
-      <button class="filter-btn" data-filter="done">Done</button>
+      <button class="filter-btn active" data-tf="all">All</button>
+      <button class="filter-btn" data-tf="today">Today</button>
+      <button class="filter-btn" data-tf="pending">Pending</button>
+      <button class="filter-btn" data-tf="done">Done</button>
     </div>
 
-    <div class="card" id="task-list-card">
-      <div class="task-list" id="task-list" aria-live="polite">
-        <!-- rendered by JS -->
+    <div class="card">
+      <div class="task-list" id="task-list" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ═══ REVIEW ═══ -->
+  <section class="tab-panel" id="tab-review" role="tabpanel">
+    <div class="review-grid">
+      <div class="card">
+        <div class="streak-block">
+          <div class="streak-num" id="rv-streak">0</div>
+          <div class="streak-sub">day streak 🔥</div>
+          <div class="streak-best" id="rv-best">Best: 0 days</div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="section-title">This week</p>
+        <div style="margin-bottom:10px">
+          <div class="progress-meta">
+            <span class="progress-label" id="rv-wlabel">0 / 0 tasks done</span>
+            <span class="progress-pct" id="rv-wpct" style="color:var(--success)">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="rv-wbar" style="width:0%;background:var(--success)"></div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)" id="rv-wdetail"></div>
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:14px">
+      <p class="section-title">7-day completion history</p>
+      <div class="week-grid" id="rv-grid"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <p class="section-title">Goal progress overview</p>
+      <div id="rv-goals"></div>
+    </div>
+
+    <div class="card" id="rv-export">
+      <p class="section-title" style="margin-bottom:14px">Export your data</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="export-csv">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download CSV
+        </button>
+        <button class="btn btn-ghost" id="export-pdf">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Print / Save PDF
+        </button>
+      </div>
+    </div>
   </section>
 
-  <!-- ══ REMINDERS TAB ══ -->
+  <!-- ═══ REMINDERS ═══ -->
   <section class="tab-panel" id="tab-reminders" role="tabpanel">
-
-    <div class="notif-card">
-      <p class="section-title" style="margin-bottom:16px;">Daily Reminders</p>
-
+    <div class="card">
+      <p class="section-title" style="margin-bottom:16px">Daily reminders</p>
       <div class="toggle-row">
         <div class="toggle-info">
           <h3>Enable daily reminder</h3>
-          <p>Get a browser notification to check your goals &amp; tasks each day.</p>
+          <p>Browser notification to check your goals &amp; tasks each day.</p>
         </div>
         <label class="toggle" aria-label="Enable daily reminder">
           <input type="checkbox" id="notif-toggle" />
           <span class="toggle-track"></span>
         </label>
       </div>
-
       <div class="toggle-row">
         <div class="toggle-info">
           <h3>Reminder time</h3>
-          <p>Preferred time for your daily nudge.</p>
+          <p>What time to send your daily nudge.</p>
         </div>
-        <input type="time" id="notif-time" value="09:00" style="width:110px; text-align:center;" />
+        <input type="time" id="notif-time" value="09:00" style="width:110px;text-align:center" />
       </div>
-
       <div id="notif-status-box"></div>
-
-      <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+      <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-primary" id="request-notif">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           Allow Notifications
         </button>
         <button class="btn btn-ghost" id="test-notif">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           Test Notification
         </button>
       </div>
-
       <div class="divider"></div>
-
-      <p class="section-title" style="margin-bottom:10px;">How it works</p>
-      <ul style="font-size:13px; color:var(--text-2); line-height:1.8; padding-left:20px;">
+      <p class="section-title" style="margin-bottom:8px">How it works</p>
+      <ul style="font-size:13px;color:var(--text-2);line-height:1.9;padding-left:18px">
         <li>Click <strong>Allow Notifications</strong> to grant browser permission.</li>
         <li>Toggle the switch on to arm your daily reminder.</li>
-        <li>Use <strong>Test Notification</strong> to preview the notification immediately.</li>
-        <li>The scheduled reminder fires each day near your chosen time — the page must be open (or a service worker is needed for true background scheduling, not included here).</li>
-        <li>Your permission status and preference are saved locally.</li>
+        <li>Use <strong>Test Notification</strong> to preview it immediately.</li>
+        <li>The reminder fires near your chosen time while this page is open.</li>
       </ul>
     </div>
-
   </section>
 
 </main>
 
 <script>
-  /* ═══════════════════════════════════════════════
-     DATA LAYER — localStorage-backed store
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════════════ */
 
-  const DB = {
-    key: 'goal_todo_v1',
+const CATS = {
+  health:   { label: '🏃 Health',   color: '#22c55e' },
+  career:   { label: '💼 Career',   color: '#6c63ff' },
+  finance:  { label: '💰 Finance',  color: '#f59e0b' },
+  personal: { label: '🏠 Personal', color: '#ec4899' },
+  learning: { label: '📚 Learning', color: '#0ea5e9' },
+  other:    { label: '⭐ Other',    color: '#888780' },
+};
 
-    load() {
-      try {
-        return JSON.parse(localStorage.getItem(this.key)) || { goals: [], tasks: [] };
-      } catch { return { goals: [], tasks: [] }; }
-    },
+/* ═══════════════════════════════════════════════════════
+   DATA LAYER
+═══════════════════════════════════════════════════════ */
 
-    save(state) {
-      localStorage.setItem(this.key, JSON.stringify(state));
+const DB = {
+  KEY: 'goal_todo_v3',
+  blank() { return { goals: [], tasks: [], history: {} }; },
+  load() {
+    try { return JSON.parse(localStorage.getItem(this.KEY)) || this.blank(); }
+    catch { return this.blank(); }
+  },
+  save(s) { localStorage.setItem(this.KEY, JSON.stringify(s)); }
+};
+
+function migrate() {
+  if (localStorage.getItem(DB.KEY)) return;
+  const raw = localStorage.getItem('goal_todo_v2') || localStorage.getItem('goal_todo_v1');
+  if (!raw) return;
+  try {
+    const old = JSON.parse(raw);
+    const s = DB.blank();
+    s.goals = (old.goals || []).map(g => ({
+      id: g.id, title: g.title, type: g.type || 'short',
+      category: g.category || 'other', desc: g.desc || '',
+      deadline: g.deadline || '', archived: g.archived || false,
+      createdAt: g.createdAt || Date.now()
+    }));
+    s.tasks = (old.tasks || []).map(t => ({
+      id: t.id, name: t.name, goalId: t.goalId || null,
+      dueDate: t.dueDate || '', recurring: t.recurring || 'none',
+      notes: t.notes || '', subtasks: t.subtasks || [],
+      done: t.done || false, lastReset: todayStr(),
+      createdAt: t.createdAt || Date.now()
+    }));
+    s.history = old.history || {};
+    localStorage.setItem(DB.KEY, JSON.stringify(s));
+  } catch(e) {}
+}
+
+let state;
+function persist() { DB.save(state); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+function weekStartStr() {
+  const d = new Date();
+  const day = d.getDay();
+  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return d.toISOString().slice(0, 10);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RECURRING RESET — fires on load each new day/week
+═══════════════════════════════════════════════════════ */
+
+function resetRecurring() {
+  const t = todayStr(), ws = weekStartStr();
+  let changed = false;
+  state.tasks.forEach(task => {
+    if (task.recurring === 'daily' && task.lastReset !== t) {
+      task.done = false; task.lastReset = t; changed = true;
+    } else if (task.recurring === 'weekly' && task.lastReset !== ws) {
+      task.done = false; task.lastReset = ws; changed = true;
     }
+  });
+  if (changed) persist();
+}
+
+/* ═══════════════════════════════════════════════════════
+   HISTORY SNAPSHOT
+═══════════════════════════════════════════════════════ */
+
+function snapshotToday() {
+  if (!state.history) state.history = {};
+  state.history[todayStr()] = {
+    done:  state.tasks.filter(t => t.done).length,
+    total: state.tasks.length
   };
+}
 
-  let state = DB.load();
+/* ═══════════════════════════════════════════════════════
+   STREAK
+═══════════════════════════════════════════════════════ */
 
-  function persist() { DB.save(state); }
-
-  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-
-  /* ═══════════════════════════════════════════════
-     GOALS — CRUD & PROGRESS
-  ═══════════════════════════════════════════════ */
-
-  function goalProgress(goalId) {
-    const linked = state.tasks.filter(t => t.goalId === goalId);
-    if (linked.length === 0) return { total: 0, done: 0, pct: 0 };
-    const done = linked.filter(t => t.done).length;
-    return { total: linked.length, done, pct: Math.round((done / linked.length) * 100) };
+function calcStreak() {
+  const h = state.history || {}, t = todayStr();
+  let streak = 0;
+  const d = new Date();
+  for (let i = 0; i < 365; i++) {
+    const key = d.toISOString().slice(0, 10);
+    if (h[key] && h[key].done > 0) streak++;
+    else if (key !== t) break;
+    d.setDate(d.getDate() - 1);
   }
+  const sorted = Object.keys(h).sort();
+  let best = 0, run = 0;
+  sorted.forEach(k => { h[k] && h[k].done > 0 ? (run++, best = Math.max(best, run)) : (run = 0); });
+  return { streak, best: Math.max(best, streak) };
+}
 
-  function addGoal(title, type, desc, deadline) {
-    const goal = { id: uid(), title, type, desc, deadline, createdAt: Date.now() };
-    state.goals.unshift(goal);
-    persist();
-  }
+/* ═══════════════════════════════════════════════════════
+   GOALS CRUD
+═══════════════════════════════════════════════════════ */
 
-  function deleteGoal(id) {
-    state.goals = state.goals.filter(g => g.id !== id);
-    // Remove task links too
-    state.tasks.forEach(t => { if (t.goalId === id) t.goalId = null; });
-    persist();
-  }
+function goalProgress(id) {
+  const linked = state.tasks.filter(t => t.goalId === id);
+  if (!linked.length) return { total: 0, done: 0, pct: 0 };
+  const done = linked.filter(t => t.done).length;
+  return { total: linked.length, done, pct: Math.round((done / linked.length) * 100) };
+}
 
-  /* ═══════════════════════════════════════════════
-     TASKS — CRUD & TOGGLE
-  ═══════════════════════════════════════════════ */
+function addGoal(title, type, category, desc, deadline) {
+  state.goals.unshift({ id: uid(), title, type, category, desc, deadline, archived: false, createdAt: Date.now() });
+  persist();
+}
 
-  function addTask(name, goalId, dueDate) {
-    const task = { id: uid(), name, goalId: goalId || null, dueDate, done: false, createdAt: Date.now() };
-    state.tasks.unshift(task);
-    persist();
-  }
+function archiveGoal(id)   { const g = state.goals.find(g => g.id === id); if (g) { g.archived = true;  persist(); } }
+function unarchiveGoal(id) { const g = state.goals.find(g => g.id === id); if (g) { g.archived = false; persist(); } }
 
-  function toggleTask(id) {
-    const task = state.tasks.find(t => t.id === id);
-    if (task) { task.done = !task.done; persist(); }
-  }
+function deleteGoal(id) {
+  state.goals = state.goals.filter(g => g.id !== id);
+  state.tasks.forEach(t => { if (t.goalId === id) t.goalId = null; });
+  persist();
+}
 
-  function deleteTask(id) {
-    state.tasks = state.tasks.filter(t => t.id !== id);
-    persist();
-  }
+/* ═══════════════════════════════════════════════════════
+   TASKS CRUD
+═══════════════════════════════════════════════════════ */
 
-  /* ═══════════════════════════════════════════════
-     RENDERING — GOALS
-  ═══════════════════════════════════════════════ */
+function addTask(name, goalId, dueDate, recurring, notes) {
+  state.tasks.unshift({
+    id: uid(), name, goalId: goalId || null, dueDate,
+    recurring: recurring || 'none', notes: notes || '',
+    subtasks: [], done: false, lastReset: todayStr(), createdAt: Date.now()
+  });
+  snapshotToday(); persist();
+}
 
-  let goalFilter = 'all';
+function toggleTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (t) { t.done = !t.done; snapshotToday(); persist(); }
+}
 
-  function renderGoals() {
-    const list = document.getElementById('goal-list');
-    let goals = state.goals;
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  snapshotToday(); persist();
+}
 
-    if (goalFilter === 'short') goals = goals.filter(g => g.type === 'short');
-    else if (goalFilter === 'long')  goals = goals.filter(g => g.type === 'long');
-    else if (goalFilter === 'done')  goals = goals.filter(g => goalProgress(g.id).pct === 100 && goalProgress(g.id).total > 0);
+function toggleSubtask(tid, sid) {
+  const t = state.tasks.find(t => t.id === tid);
+  const s = t && t.subtasks.find(s => s.id === sid);
+  if (s) { s.done = !s.done; persist(); }
+}
 
-    if (goals.length === 0) {
-      list.innerHTML = `
-        <div class="empty">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          <p>${goalFilter === 'all' ? 'No goals yet. Add your first goal above!' : 'No goals match this filter.'}</p>
-        </div>`;
-      return;
-    }
+function addSubtask(tid, text) {
+  if (!text.trim()) return false;
+  const t = state.tasks.find(t => t.id === tid);
+  if (!t) return false;
+  t.subtasks.push({ id: uid(), text: text.trim(), done: false });
+  persist(); return true;
+}
 
-    list.innerHTML = goals.map(goal => {
-      const prog = goalProgress(goal.id);
-      const isDone = prog.pct === 100 && prog.total > 0;
-      const typeLabel = goal.type === 'short' ? 'Short-Term' : 'Long-Term';
-      const badgeClass = goal.type === 'short' ? 'badge-short' : 'badge-long';
-      const deadlineStr = goal.deadline ? ` · Due ${fmtDate(goal.deadline)}` : '';
+function deleteSubtask(tid, sid) {
+  const t = state.tasks.find(t => t.id === tid);
+  if (t) { t.subtasks = t.subtasks.filter(s => s.id !== sid); persist(); }
+}
 
-      return `
-        <div class="goal-item" data-id="${goal.id}">
-          <div class="goal-header">
-            <div>
-              <div class="goal-title">${esc(goal.title)}</div>
-              ${goal.desc ? `<div class="goal-desc">${esc(goal.desc)}</div>` : ''}
-              <div class="goal-meta">
-                <span class="badge ${badgeClass}">${typeLabel}</span>
-                ${isDone ? '<span class="badge badge-done">✓ Complete</span>' : ''}
-                <span class="done-count">${prog.done}/${prog.total} tasks${deadlineStr}</span>
-              </div>
-            </div>
-            <div class="goal-actions">
-              <button class="icon-btn delete" title="Delete goal" onclick="handleDeleteGoal('${goal.id}')" aria-label="Delete goal ${esc(goal.title)}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-              </button>
+function saveNotes(tid, notes) {
+  const t = state.tasks.find(t => t.id === tid);
+  if (t) { t.notes = notes; persist(); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXPAND STATE
+═══════════════════════════════════════════════════════ */
+
+const expanded = new Set();
+function toggleExpand(id) {
+  expanded.has(id) ? expanded.delete(id) : expanded.add(id);
+  renderTasks();
+}
+
+/* ═══════════════════════════════════════════════════════
+   DEADLINE BADGE
+═══════════════════════════════════════════════════════ */
+
+function deadlineBadge(dl) {
+  if (!dl) return '';
+  const now = new Date(); now.setHours(0,0,0,0);
+  const [y,m,d] = dl.split('-').map(Number);
+  const diff = Math.round((new Date(y,m-1,d) - now) / 86400000);
+  if (diff < 0)   return `<span class="deadline-badge dl-over">${Math.abs(diff)}d overdue</span>`;
+  if (diff === 0) return `<span class="deadline-badge dl-soon">Due today</span>`;
+  if (diff <= 7)  return `<span class="deadline-badge dl-soon">${diff}d left</span>`;
+  return              `<span class="deadline-badge dl-ok">${diff}d left</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER — GOALS
+═══════════════════════════════════════════════════════ */
+
+let goalFilter = 'all';
+
+function renderGoals() {
+  const list = document.getElementById('goal-list');
+  let goals = state.goals;
+  if      (goalFilter === 'short')    goals = goals.filter(g => !g.archived && g.type === 'short');
+  else if (goalFilter === 'long')     goals = goals.filter(g => !g.archived && g.type === 'long');
+  else if (goalFilter === 'done')     goals = goals.filter(g => !g.archived && goalProgress(g.id).pct === 100 && goalProgress(g.id).total > 0);
+  else if (goalFilter === 'archived') goals = goals.filter(g => g.archived);
+  else                                goals = goals.filter(g => !g.archived);
+
+  if (!goals.length) {
+    list.innerHTML = `<div class="empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <p>${goalFilter === 'all' ? 'No goals yet — click New Goal to get started.' : 'No goals match this filter.'}</p>
+    </div>`;
+  } else {
+    list.innerHTML = goals.map(g => {
+      const p   = goalProgress(g.id);
+      const cat = CATS[g.category] || CATS.other;
+      const col = cat.color;
+      const isDone = p.pct === 100 && p.total > 0;
+      const fill = isDone
+        ? 'background:linear-gradient(90deg,#22c55e,#4ade80)'
+        : `background:linear-gradient(90deg,${col},${col}88)`;
+
+      return `<div class="goal-item${g.archived ? ' archived' : ''}" style="border-left-color:${col}">
+        <div class="goal-header">
+          <div style="flex:1;min-width:0">
+            <div class="goal-title">${esc(g.title)}</div>
+            ${g.desc ? `<div class="goal-desc">${esc(g.desc)}</div>` : ''}
+            <div class="goal-meta">
+              <span class="badge" style="background:${col}18;color:${col}">${cat.label}</span>
+              <span class="badge ${g.type==='short'?'badge-short':'badge-long'}">${g.type==='short'?'Short':'Long'}-Term</span>
+              ${isDone ? '<span class="badge badge-done">✓ Complete</span>' : ''}
+              ${g.archived ? '<span class="badge badge-arch">Archived</span>' : ''}
+              ${deadlineBadge(g.deadline)}
+              <span class="done-count">${p.done}/${p.total} tasks</span>
             </div>
           </div>
-          <div class="progress-wrap">
-            <div class="progress-meta">
-              <span class="progress-label">Progress</span>
-              <span class="progress-pct">${prog.pct}%</span>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuenow="${prog.pct}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(goal.title)} progress">
-              <div class="progress-fill ${isDone ? 'done' : ''}" style="width:${prog.pct}%"></div>
-            </div>
+          <div class="goal-actions">
+            ${!g.archived && isDone ? `<button class="icon-btn arch-btn" onclick="wArchive('${g.id}')" title="Archive goal" aria-label="Archive goal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+            </button>` : ''}
+            ${g.archived ? `<button class="icon-btn" onclick="wUnarchive('${g.id}')" title="Restore goal" aria-label="Restore goal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+            </button>` : ''}
+            <button class="icon-btn delete" onclick="wDeleteGoal('${g.id}')" title="Delete goal" aria-label="Delete goal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
           </div>
-        </div>`;
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span class="progress-label">Progress</span>
+            <span class="progress-pct" style="color:${isDone?'#22c55e':col}">${p.pct}%</span>
+          </div>
+          <div class="progress-track" role="progressbar" aria-valuenow="${p.pct}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-fill" style="width:${p.pct}%;${fill}"></div>
+          </div>
+        </div>
+      </div>`;
     }).join('');
-
-    // Update stats
-    document.getElementById('stat-goals').textContent = state.goals.length;
-    document.getElementById('stat-short').textContent = state.goals.filter(g => g.type === 'short').length;
-    document.getElementById('stat-long').textContent  = state.goals.filter(g => g.type === 'long').length;
   }
 
-  /* ═══════════════════════════════════════════════
-     RENDERING — TASKS
-  ═══════════════════════════════════════════════ */
+  const active = state.goals.filter(g => !g.archived);
+  document.getElementById('sg-total').textContent = active.length;
+  document.getElementById('sg-short').textContent = active.filter(g => g.type === 'short').length;
+  document.getElementById('sg-long').textContent  = active.filter(g => g.type === 'long').length;
+  document.getElementById('sg-arch').textContent  = state.goals.filter(g => g.archived).length;
+}
 
-  let taskFilter = 'all';
+/* ═══════════════════════════════════════════════════════
+   RENDER — TASKS
+═══════════════════════════════════════════════════════ */
 
-  function renderTasks() {
-    const list = document.getElementById('task-list');
-    let tasks = state.tasks;
+let taskFilter = 'all';
 
-    if (taskFilter === 'pending') tasks = tasks.filter(t => !t.done);
-    else if (taskFilter === 'done') tasks = tasks.filter(t => t.done);
+function isTaskToday(t) {
+  if (t.recurring === 'daily') return true;
+  if (t.recurring === 'weekly') return t.lastReset === weekStartStr();
+  return t.dueDate === todayStr();
+}
 
-    if (tasks.length === 0) {
-      list.innerHTML = `
-        <div class="empty">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          <p>${taskFilter === 'all' ? 'No tasks yet. Add your first task above!' : 'No tasks match this filter.'}</p>
+function renderTasks() {
+  const list = document.getElementById('task-list');
+  let tasks = [...state.tasks];
+  if      (taskFilter === 'today')   tasks = tasks.filter(isTaskToday);
+  else if (taskFilter === 'pending') tasks = tasks.filter(t => !t.done);
+  else if (taskFilter === 'done')    tasks = tasks.filter(t => t.done);
+
+  if (!tasks.length) {
+    list.innerHTML = `<div class="empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <p>${taskFilter === 'all' ? 'No tasks yet — click New Task to add one.' : 'No tasks match this filter.'}</p>
+    </div>`;
+  } else {
+    list.innerHTML = tasks.map(t => {
+      const goal = t.goalId ? state.goals.find(g => g.id === t.goalId) : null;
+      const cat  = goal ? (CATS[goal.category] || CATS.other) : null;
+      const isEx = expanded.has(t.id);
+      const subDone  = t.subtasks.filter(s => s.done).length;
+      const subTotal = t.subtasks.length;
+      const dueTag = t.dueDate && t.recurring === 'none'
+        ? `<span style="font-size:11px;color:var(--text-3)"> · due ${fmtDate(t.dueDate)}</span>` : '';
+      const subTag = subTotal
+        ? `<span style="font-size:11px;color:var(--text-3);margin-left:4px">· ${subDone}/${subTotal} subtasks</span>` : '';
+
+      let detail = '';
+      if (isEx) {
+        const subItems = t.subtasks.map(s => `
+          <div class="subtask-item">
+            <button class="subtask-check ${s.done?'checked':''}" onclick="wToggleSub('${t.id}','${s.id}')" aria-label="Toggle subtask">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <span class="subtask-text ${s.done?'done':''}">${esc(s.text)}</span>
+            <button class="icon-btn delete" style="width:22px;height:22px" onclick="wDeleteSub('${t.id}','${s.id}')" aria-label="Delete subtask">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>`).join('');
+
+        detail = `<div class="task-detail open">
+          <textarea class="task-notes" placeholder="Notes..." onblur="wSaveNotes('${t.id}',this.value)">${esc(t.notes||'')}</textarea>
+          ${subTotal ? `<div class="subtask-list">${subItems}</div>` : ''}
+          <div class="add-sub-row">
+            <input type="text" id="sub-${t.id}" placeholder="Add a subtask..." onkeydown="if(event.key==='Enter')wAddSub('${t.id}')" />
+            <button class="btn btn-ghost btn-sm" onclick="wAddSub('${t.id}')">+ Add</button>
+          </div>
         </div>`;
-    } else {
-      list.innerHTML = tasks.map(task => {
-        const goal = task.goalId ? state.goals.find(g => g.id === task.goalId) : null;
-        const goalTag = goal
-          ? `<span class="task-goal-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>${esc(goal.title)}</span>`
-          : '';
-        const dueStr = task.dueDate ? ` · Due ${fmtDate(task.dueDate)}` : '';
-        return `
-          <div class="task-item" data-id="${task.id}">
-            <button class="task-check ${task.done ? 'checked' : ''}" onclick="handleToggleTask('${task.id}')" aria-label="${task.done ? 'Mark incomplete' : 'Mark complete'}: ${esc(task.name)}" aria-pressed="${task.done}">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
-            <div class="task-body">
-              <div class="task-name ${task.done ? 'done' : ''}">${esc(task.name)}${dueStr ? `<span style="font-size:12px;color:var(--text-3);font-weight:400;"> ${dueStr}</span>` : ''}</div>
-              ${goalTag}
-            </div>
-            <button class="icon-btn delete" onclick="handleDeleteTask('${task.id}')" title="Delete task" aria-label="Delete task ${esc(task.name)}">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>`;
-      }).join('');
-    }
-
-    // Stats
-    const total   = state.tasks.length;
-    const done    = state.tasks.filter(t => t.done).length;
-    document.getElementById('stat-tasks').textContent   = total;
-    document.getElementById('stat-done').textContent    = done;
-    document.getElementById('stat-pending').textContent = total - done;
-  }
-
-  /* ═══════════════════════════════════════════════
-     RENDER GOAL DROPDOWN IN TASK FORM
-  ═══════════════════════════════════════════════ */
-
-  function refreshGoalDropdown() {
-    const sel = document.getElementById('task-goal');
-    const current = sel.value;
-    sel.innerHTML = '<option value="">— No goal —</option>' +
-      state.goals.map(g =>
-        `<option value="${g.id}" ${current === g.id ? 'selected' : ''}>${esc(g.title)} (${g.type === 'short' ? 'Short' : 'Long'})</option>`
-      ).join('');
-  }
-
-  /* ═══════════════════════════════════════════════
-     FULL RE-RENDER
-  ═══════════════════════════════════════════════ */
-
-  function renderAll() {
-    renderGoals();
-    renderTasks();
-    refreshGoalDropdown();
-  }
-
-  /* ═══════════════════════════════════════════════
-     EVENT HANDLERS — GOALS
-  ═══════════════════════════════════════════════ */
-
-  function handleDeleteGoal(id) {
-    const goal = state.goals.find(g => g.id === id);
-    if (!goal) return;
-    if (!confirm(`Delete goal "${goal.title}"? Linked tasks will remain but lose their goal connection.`)) return;
-    deleteGoal(id);
-    renderAll();
-  }
-
-  document.getElementById('add-goal-toggle').addEventListener('click', function() {
-    const wrap = document.getElementById('goal-form-wrap');
-    const isOpen = wrap.classList.toggle('open');
-    this.setAttribute('aria-expanded', isOpen);
-    if (isOpen) document.getElementById('goal-title').focus();
-  });
-
-  document.getElementById('cancel-goal').addEventListener('click', function() {
-    closeGoalForm();
-  });
-
-  document.getElementById('save-goal').addEventListener('click', function() {
-    const title = document.getElementById('goal-title').value.trim();
-    if (!title) { document.getElementById('goal-title').focus(); return; }
-    const type     = document.getElementById('goal-type').value;
-    const desc     = document.getElementById('goal-desc').value.trim();
-    const deadline = document.getElementById('goal-deadline').value;
-    addGoal(title, type, desc, deadline);
-    clearGoalForm();
-    closeGoalForm();
-    renderAll();
-  });
-
-  // Enter key submits goal form
-  document.getElementById('goal-title').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('save-goal').click();
-  });
-
-  function closeGoalForm() {
-    const wrap = document.getElementById('goal-form-wrap');
-    wrap.classList.remove('open');
-    document.getElementById('add-goal-toggle').setAttribute('aria-expanded', false);
-  }
-
-  function clearGoalForm() {
-    document.getElementById('goal-title').value = '';
-    document.getElementById('goal-desc').value  = '';
-    document.getElementById('goal-deadline').value = '';
-    document.getElementById('goal-type').value  = 'short';
-  }
-
-  // Goal filter buttons
-  document.querySelectorAll('#tab-goals .filter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('#tab-goals .filter-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      goalFilter = this.dataset.filter;
-      renderGoals();
-    });
-  });
-
-  /* ═══════════════════════════════════════════════
-     EVENT HANDLERS — TASKS
-  ═══════════════════════════════════════════════ */
-
-  function handleToggleTask(id) {
-    toggleTask(id);
-    renderAll(); // updates both task list AND goal progress bars
-  }
-
-  function handleDeleteTask(id) {
-    deleteTask(id);
-    renderAll();
-  }
-
-  document.getElementById('add-task-toggle').addEventListener('click', function() {
-    const wrap = document.getElementById('task-form-wrap');
-    const isOpen = wrap.classList.toggle('open');
-    this.setAttribute('aria-expanded', isOpen);
-    if (isOpen) {
-      refreshGoalDropdown();
-      document.getElementById('task-name').focus();
-    }
-  });
-
-  document.getElementById('cancel-task').addEventListener('click', function() {
-    closeTaskForm();
-  });
-
-  document.getElementById('save-task').addEventListener('click', function() {
-    const name = document.getElementById('task-name').value.trim();
-    if (!name) { document.getElementById('task-name').focus(); return; }
-    const goalId  = document.getElementById('task-goal').value;
-    const dueDate = document.getElementById('task-date').value;
-    addTask(name, goalId, dueDate);
-    clearTaskForm();
-    closeTaskForm();
-    renderAll();
-  });
-
-  document.getElementById('task-name').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('save-task').click();
-  });
-
-  function closeTaskForm() {
-    const wrap = document.getElementById('task-form-wrap');
-    wrap.classList.remove('open');
-    document.getElementById('add-task-toggle').setAttribute('aria-expanded', false);
-  }
-
-  function clearTaskForm() {
-    document.getElementById('task-name').value = '';
-    document.getElementById('task-goal').value = '';
-    document.getElementById('task-date').value = '';
-  }
-
-  // Task filter buttons
-  document.querySelectorAll('#tab-tasks .filter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('#tab-tasks .filter-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      taskFilter = this.dataset.filter;
-      renderTasks();
-    });
-  });
-
-  /* ═══════════════════════════════════════════════
-     TAB NAVIGATION
-  ═══════════════════════════════════════════════ */
-
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      this.classList.add('active');
-      this.setAttribute('aria-selected', 'true');
-      document.getElementById('tab-' + this.dataset.tab).classList.add('active');
-      if (this.dataset.tab === 'tasks') refreshGoalDropdown();
-    });
-  });
-
-  /* ═══════════════════════════════════════════════
-     NOTIFICATIONS
-  ═══════════════════════════════════════════════ */
-
-  const NOTIF_PREF_KEY = 'goal_todo_notif';
-
-  function loadNotifPrefs() {
-    try { return JSON.parse(localStorage.getItem(NOTIF_PREF_KEY)) || { enabled: false, time: '09:00' }; }
-    catch { return { enabled: false, time: '09:00' }; }
-  }
-
-  function saveNotifPrefs(prefs) {
-    localStorage.setItem(NOTIF_PREF_KEY, JSON.stringify(prefs));
-  }
-
-  function updateNotifStatus() {
-    const box = document.getElementById('notif-status-box');
-    const perm = 'Notification' in window ? Notification.permission : 'unavailable';
-    const msgs = {
-      granted:     { cls: 'allowed', icon: '✓', text: 'Notifications are allowed.' },
-      denied:      { cls: 'denied',  icon: '✗', text: 'Notifications are blocked. Please update your browser settings to allow them for this page.' },
-      default:     { cls: 'default', icon: '!', text: 'Permission not yet granted. Click "Allow Notifications" below.' },
-      unavailable: { cls: 'denied',  icon: '!', text: 'This browser does not support the Web Notifications API.' },
-    };
-    const m = msgs[perm] || msgs.unavailable;
-    box.innerHTML = `<div class="notif-status ${m.cls}">${m.icon} ${m.text}</div>`;
-  }
-
-  document.getElementById('request-notif').addEventListener('click', async function() {
-    if (!('Notification' in window)) {
-      alert('Your browser does not support notifications.');
-      return;
-    }
-    if (Notification.permission === 'denied') {
-      alert('Notifications are blocked for this page. Please allow them in your browser settings (click the padlock/info icon in the address bar).');
-      return;
-    }
-    const perm = await Notification.requestPermission();
-    updateNotifStatus();
-    if (perm === 'granted') {
-      const prefs = loadNotifPrefs();
-      prefs.enabled = true;
-      saveNotifPrefs(prefs);
-      document.getElementById('notif-toggle').checked = true;
-    }
-  });
-
-  document.getElementById('test-notif').addEventListener('click', function() {
-    if (!('Notification' in window)) { alert('Notifications not supported.'); return; }
-    if (Notification.permission !== 'granted') {
-      alert('Please allow notifications first by clicking "Allow Notifications".');
-      return;
-    }
-    const pending = state.tasks.filter(t => !t.done).length;
-    const goals   = state.goals.length;
-    new Notification('Goal To-Do — Daily Check-In 🎯', {
-      body: `You have ${pending} task${pending !== 1 ? 's' : ''} pending across ${goals} goal${goals !== 1 ? 's' : ''}. Keep going!`,
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="26" font-size="28">🎯</text></svg>',
-      badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="%236c63ff"/></svg>',
-      tag: 'goal-todo-test'
-    });
-  });
-
-  // Sync toggle with prefs
-  const notifPrefs = loadNotifPrefs();
-  const notifToggle = document.getElementById('notif-toggle');
-  const notifTime   = document.getElementById('notif-time');
-  notifToggle.checked = notifPrefs.enabled;
-  notifTime.value   = notifPrefs.time || '09:00';
-
-  notifToggle.addEventListener('change', function() {
-    const prefs = loadNotifPrefs();
-    prefs.enabled = this.checked;
-    saveNotifPrefs(prefs);
-    if (this.checked && Notification.permission !== 'granted') {
-      this.checked = false;
-      prefs.enabled = false;
-      saveNotifPrefs(prefs);
-      alert('Please click "Allow Notifications" first to enable permission.');
-    }
-  });
-
-  notifTime.addEventListener('change', function() {
-    const prefs = loadNotifPrefs();
-    prefs.time = this.value;
-    saveNotifPrefs(prefs);
-  });
-
-  updateNotifStatus();
-
-  /* ═══════════════════════════════════════════════
-     SCHEDULED DAILY NOTIFICATION (polling approach)
-     Fires once per day when the page is open near
-     the user's chosen reminder time.
-  ═══════════════════════════════════════════════ */
-
-  (function startDailyNotifPoller() {
-    const LAST_FIRED_KEY = 'goal_todo_last_notif';
-
-    function maybeFire() {
-      const prefs = loadNotifPrefs();
-      if (!prefs.enabled || Notification.permission !== 'granted') return;
-
-      const now        = new Date();
-      const [hh, mm]   = (prefs.time || '09:00').split(':').map(Number);
-      const todayKey   = now.toDateString();
-      const lastFired  = localStorage.getItem(LAST_FIRED_KEY);
-
-      // Already fired today
-      if (lastFired === todayKey) return;
-
-      // Within 5 minutes of the target time
-      const targetMin  = hh * 60 + mm;
-      const nowMin     = now.getHours() * 60 + now.getMinutes();
-      if (Math.abs(nowMin - targetMin) <= 5) {
-        localStorage.setItem(LAST_FIRED_KEY, todayKey);
-        const pending = state.tasks.filter(t => !t.done).length;
-        const goals   = state.goals.length;
-        new Notification('Goal To-Do — Daily Check-In 🎯', {
-          body: `Morning! You have ${pending} task${pending !== 1 ? 's' : ''} pending across ${goals} goal${goals !== 1 ? 's' : ''}. Let's crush it!`,
-          tag: 'goal-todo-daily'
-        });
       }
-    }
 
-    // Check every minute
-    setInterval(maybeFire, 60 * 1000);
-  })();
-
-  /* ═══════════════════════════════════════════════
-     HELPERS
-  ═══════════════════════════════════════════════ */
-
-  function esc(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      return `<div class="task-item" data-task-id="${t.id}">
+        <div class="task-row">
+          <span class="drag-handle" draggable="true" data-drag="${t.id}" title="Drag to reorder" aria-hidden="true">⠿</span>
+          <button class="task-check ${t.done?'checked':''}" onclick="wToggleTask('${t.id}')" aria-pressed="${t.done}" aria-label="${t.done?'Mark incomplete':'Mark complete'}">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <div class="task-body">
+            <div class="task-name ${t.done?'done':''}">${esc(t.name)}${dueTag}${subTag}</div>
+            <div class="task-tags">
+              ${goal ? `<span class="task-goal-tag" style="background:${cat.color}18;color:${cat.color}">${cat.label} · ${esc(goal.title)}</span>` : ''}
+              ${t.recurring !== 'none' ? `<span class="recur-tag">↻ ${t.recurring}</span>` : ''}
+            </div>
+          </div>
+          <div class="task-right">
+            <button class="expand-btn ${isEx?'open':''}" onclick="wExpand('${t.id}')" aria-expanded="${isEx}" aria-label="${isEx?'Collapse':'Expand'} task">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <button class="icon-btn delete" onclick="wDeleteTask('${t.id}')" aria-label="Delete task">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        ${detail}
+      </div>`;
+    }).join('');
   }
 
-  function fmtDate(dateStr) {
-    if (!dateStr) return '';
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  }
+  const total = state.tasks.length, done = state.tasks.filter(t => t.done).length;
+  const { streak } = calcStreak();
+  document.getElementById('st-total').textContent   = total;
+  document.getElementById('st-done').textContent    = done;
+  document.getElementById('st-pending').textContent = total - done;
+  document.getElementById('st-streak').textContent  = streak;
 
-  /* ═══════════════════════════════════════════════
-     INIT
-  ═══════════════════════════════════════════════ */
+  initDrag();
+}
 
+/* ═══════════════════════════════════════════════════════
+   RENDER — REVIEW
+═══════════════════════════════════════════════════════ */
+
+function renderReview() {
+  const { streak, best } = calcStreak();
+  document.getElementById('rv-streak').textContent = streak;
+  document.getElementById('rv-best').textContent   = `Best: ${best} day${best !== 1 ? 's' : ''}`;
+
+  const done = state.tasks.filter(t => t.done).length, total = state.tasks.length;
+  const pct  = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('rv-wlabel').textContent = `${done} / ${total} tasks done`;
+  document.getElementById('rv-wpct').textContent   = `${pct}%`;
+  document.getElementById('rv-wbar').style.width   = `${pct}%`;
+
+  const rec = state.tasks.filter(t => t.recurring !== 'none').length;
+  const act = state.goals.filter(g => !g.archived).length;
+  document.getElementById('rv-wdetail').textContent =
+    `${rec} recurring task${rec !== 1 ? 's' : ''} · ${act} active goal${act !== 1 ? 's' : ''}`;
+
+  // 7-day grid
+  const DAYS = ['M','T','W','T','F','S','S'];
+  const t = todayStr(), h = state.history || {};
+  document.getElementById('rv-grid').innerHTML = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const key = d.toISOString().slice(0, 10);
+    const rec = h[key] || { done: 0, total: 0 };
+    const idx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+    const cls = rec.total > 0 ? (rec.done >= rec.total ? 'day-all' : 'day-some') : 'day-none';
+    return `<div class="day-cell ${cls}${key === t ? ' day-today' : ''}" title="${key}: ${rec.done}/${rec.total} done">
+      <div class="day-lbl">${DAYS[idx]}</div>
+      <div class="day-num">${d.getDate()}</div>
+    </div>`;
+  }).join('');
+
+  // Goal overview
+  const active = state.goals.filter(g => !g.archived);
+  document.getElementById('rv-goals').innerHTML = !active.length
+    ? '<p style="font-size:13px;color:var(--text-3)">No active goals yet.</p>'
+    : active.map(g => {
+        const p   = goalProgress(g.id);
+        const cat = CATS[g.category] || CATS.other;
+        return `<div style="margin-bottom:13px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px">${cat.label}</span>${esc(g.title)}${g.deadline ? ' ' + deadlineBadge(g.deadline) : ''}
+            </span>
+            <span style="font-size:12px;font-weight:700;color:${cat.color};flex-shrink:0;margin-left:8px">${p.pct}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:${p.pct}%;background:${cat.color}"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:3px">${p.done} of ${p.total} linked tasks done</div>
+        </div>`;
+      }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   GOAL DROPDOWN
+═══════════════════════════════════════════════════════ */
+
+function refreshGoalDrop() {
+  const sel = document.getElementById('t-goal'), cur = sel.value;
+  sel.innerHTML = '<option value="">— No goal —</option>' +
+    state.goals.filter(g => !g.archived).map(g =>
+      `<option value="${g.id}"${cur===g.id?' selected':''}>${esc(g.title)}</option>`
+    ).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   FULL RENDER
+═══════════════════════════════════════════════════════ */
+
+function renderAll() { renderGoals(); renderTasks(); renderReview(); refreshGoalDrop(); }
+
+/* ═══════════════════════════════════════════════════════
+   DRAG AND DROP
+═══════════════════════════════════════════════════════ */
+
+let dragId = null, dragOverId = null;
+
+function initDrag() {
+  const list = document.getElementById('task-list');
+  if (!list) return;
+
+  list.querySelectorAll('[data-drag]').forEach(handle => {
+    handle.addEventListener('dragstart', e => {
+      dragId = handle.dataset.drag;
+      e.dataTransfer.effectAllowed = 'move';
+      handle.closest('.task-item').style.opacity = '0.45';
+    });
+    handle.addEventListener('dragend', () => {
+      const item = handle.closest('.task-item');
+      if (item) item.style.opacity = '';
+      list.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      dragId = null; dragOverId = null;
+    });
+  });
+
+  list.querySelectorAll('.task-item').forEach(item => {
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!dragId || item.dataset.taskId === dragId) return;
+      list.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      item.classList.add('drag-over');
+      dragOverId = item.dataset.taskId;
+    });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragId || !dragOverId || dragId === dragOverId) return;
+      const fi = state.tasks.findIndex(t => t.id === dragId);
+      const ti = state.tasks.findIndex(t => t.id === dragOverId);
+      if (fi === -1 || ti === -1) return;
+      const [moved] = state.tasks.splice(fi, 1);
+      state.tasks.splice(ti, 0, moved);
+      persist(); renderTasks();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXPORT
+═══════════════════════════════════════════════════════ */
+
+document.getElementById('export-csv').addEventListener('click', () => {
+  const rows = [
+    ['Type','Title','Category','Term','Status','Progress%','Tasks Done','Tasks Total','Deadline','Description'],
+    ...state.goals.map(g => {
+      const p = goalProgress(g.id), c = CATS[g.category] || CATS.other;
+      return ['Goal',g.title,c.label,g.type,p.pct===100&&p.total>0?'Complete':'Active',p.pct,p.done,p.total,g.deadline||'',g.desc||''];
+    }),
+    [],
+    ['Type','Task','Linked Goal','Recurring','Done','Due Date','Notes','Subtasks Done','Subtasks Total'],
+    ...state.tasks.map(t => {
+      const g = t.goalId ? state.goals.find(g => g.id === t.goalId) : null;
+      return ['Task',t.name,g?g.title:'',t.recurring,t.done?'Yes':'No',t.dueDate||'',t.notes||'',t.subtasks.filter(s=>s.done).length,t.subtasks.length];
+    })
+  ];
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  Object.assign(document.createElement('a'), {
+    href: 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv),
+    download: `goal-todo-${todayStr()}.csv`
+  }).click();
+});
+
+document.getElementById('export-pdf').addEventListener('click', () => window.print());
+
+/* ═══════════════════════════════════════════════════════
+   GOAL FORM EVENTS
+═══════════════════════════════════════════════════════ */
+
+document.getElementById('add-goal-toggle').addEventListener('click', function() {
+  const open = document.getElementById('goal-form-wrap').classList.toggle('open');
+  this.setAttribute('aria-expanded', open);
+  if (open) document.getElementById('g-title').focus();
+});
+
+document.getElementById('cancel-goal').addEventListener('click', () => {
+  document.getElementById('goal-form-wrap').classList.remove('open');
+  document.getElementById('add-goal-toggle').setAttribute('aria-expanded', false);
+});
+
+document.getElementById('save-goal').addEventListener('click', () => {
+  const title = document.getElementById('g-title').value.trim();
+  if (!title) { document.getElementById('g-title').focus(); return; }
+  addGoal(title, document.getElementById('g-type').value, document.getElementById('g-cat').value,
+          document.getElementById('g-desc').value.trim(), document.getElementById('g-deadline').value);
+  ['g-title','g-desc','g-deadline'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('goal-form-wrap').classList.remove('open');
+  document.getElementById('add-goal-toggle').setAttribute('aria-expanded', false);
   renderAll();
+});
 
-  // Expose handlers to inline onclick attributes
-  window.handleDeleteGoal = handleDeleteGoal;
-  window.handleToggleTask = handleToggleTask;
-  window.handleDeleteTask = handleDeleteTask;
+document.getElementById('g-title').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('save-goal').click();
+});
+
+document.querySelectorAll('[data-gf]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('[data-gf]').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    goalFilter = this.dataset.gf;
+    renderGoals();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   TASK FORM EVENTS
+═══════════════════════════════════════════════════════ */
+
+document.getElementById('add-task-toggle').addEventListener('click', function() {
+  const open = document.getElementById('task-form-wrap').classList.toggle('open');
+  this.setAttribute('aria-expanded', open);
+  if (open) { refreshGoalDrop(); document.getElementById('t-name').focus(); }
+});
+
+document.getElementById('cancel-task').addEventListener('click', () => {
+  document.getElementById('task-form-wrap').classList.remove('open');
+  document.getElementById('add-task-toggle').setAttribute('aria-expanded', false);
+});
+
+document.getElementById('save-task').addEventListener('click', () => {
+  const name = document.getElementById('t-name').value.trim();
+  if (!name) { document.getElementById('t-name').focus(); return; }
+  addTask(name, document.getElementById('t-goal').value, document.getElementById('t-date').value,
+          document.getElementById('t-recur').value, document.getElementById('t-notes').value.trim());
+  ['t-name','t-notes','t-date'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('t-recur').value = 'none';
+  document.getElementById('t-goal').value  = '';
+  document.getElementById('task-form-wrap').classList.remove('open');
+  document.getElementById('add-task-toggle').setAttribute('aria-expanded', false);
+  renderAll();
+});
+
+document.getElementById('t-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('save-task').click();
+});
+
+document.querySelectorAll('[data-tf]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('[data-tf]').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    taskFilter = this.dataset.tf;
+    renderTasks();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   TAB NAVIGATION
+═══════════════════════════════════════════════════════ */
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    this.setAttribute('aria-selected','true');
+    document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    if (this.dataset.tab === 'tasks')  refreshGoalDrop();
+    if (this.dataset.tab === 'review') renderReview();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   NOTIFICATIONS
+═══════════════════════════════════════════════════════ */
+
+const NOTIF_KEY = 'goal_todo_notif_v2';
+const loadNP = () => { try { return JSON.parse(localStorage.getItem(NOTIF_KEY)) || { enabled: false, time: '09:00' }; } catch { return { enabled: false, time: '09:00' }; } };
+const saveNP = p  => localStorage.setItem(NOTIF_KEY, JSON.stringify(p));
+
+function updateNotifStatus() {
+  const perm = 'Notification' in window ? Notification.permission : 'unavailable';
+  const MAP  = {
+    granted:     ['ns-ok',   '✓ Notifications are allowed.'],
+    denied:      ['ns-deny', '✗ Notifications blocked — update browser site settings to allow them.'],
+    default:     ['ns-warn', '! Permission not yet granted. Click Allow Notifications below.'],
+    unavailable: ['ns-deny', '! This browser does not support Web Notifications.'],
+  };
+  const [cls, msg] = MAP[perm] || MAP.unavailable;
+  document.getElementById('notif-status-box').innerHTML = `<div class="notif-status ${cls}">${msg}</div>`;
+}
+
+document.getElementById('request-notif').addEventListener('click', async () => {
+  if (!('Notification' in window)) { alert('Your browser does not support notifications.'); return; }
+  if (Notification.permission === 'denied') {
+    alert('Notifications are blocked. Click the padlock icon in your address bar to allow them.'); return;
+  }
+  const perm = await Notification.requestPermission();
+  updateNotifStatus();
+  if (perm === 'granted') {
+    const p = loadNP(); p.enabled = true; saveNP(p);
+    document.getElementById('notif-toggle').checked = true;
+  }
+});
+
+document.getElementById('test-notif').addEventListener('click', () => {
+  if (!('Notification' in window)) { alert('Not supported.'); return; }
+  if (Notification.permission !== 'granted') { alert('Please allow notifications first.'); return; }
+  const pending = state.tasks.filter(t => !t.done).length;
+  const goals   = state.goals.filter(g => !g.archived).length;
+  new Notification('Goal To-Do — Daily Check-In 🎯', {
+    body: `${pending} task${pending!==1?'s':''} pending across ${goals} active goal${goals!==1?'s':''}. Keep going!`,
+    tag: 'goal-todo-test'
+  });
+});
+
+const np = loadNP();
+document.getElementById('notif-toggle').checked = np.enabled;
+document.getElementById('notif-time').value     = np.time || '09:00';
+
+document.getElementById('notif-toggle').addEventListener('change', function() {
+  if (this.checked && Notification.permission !== 'granted') {
+    this.checked = false; alert('Please click "Allow Notifications" first.'); return;
+  }
+  const p = loadNP(); p.enabled = this.checked; saveNP(p);
+});
+
+document.getElementById('notif-time').addEventListener('change', function() {
+  const p = loadNP(); p.time = this.value; saveNP(p);
+});
+
+updateNotifStatus();
+
+;(function startPoller() {
+  const LAST = 'goal_todo_last_notif';
+  setInterval(() => {
+    const p = loadNP();
+    if (!p.enabled || Notification.permission !== 'granted') return;
+    const now = new Date(), [hh,mm] = (p.time||'09:00').split(':').map(Number);
+    const key = todayStr();
+    if (localStorage.getItem(LAST) === key) return;
+    if (Math.abs(now.getHours()*60 + now.getMinutes() - (hh*60+mm)) <= 5) {
+      localStorage.setItem(LAST, key);
+      const pending = state.tasks.filter(t => !t.done).length;
+      new Notification('Goal To-Do — Daily Check-In 🎯', {
+        body: `${pending} task${pending!==1?'s':''} pending. Let's crush today!`,
+        tag: 'goal-todo-daily'
+      });
+    }
+  }, 60000);
+})();
+
+/* ═══════════════════════════════════════════════════════
+   WINDOW HANDLERS (inline onclick targets)
+═══════════════════════════════════════════════════════ */
+
+window.wArchive    = id => { archiveGoal(id);   renderAll(); };
+window.wUnarchive  = id => { unarchiveGoal(id); renderAll(); };
+window.wDeleteGoal = id => {
+  const g = state.goals.find(g => g.id === id);
+  if (g && confirm(`Delete "${g.title}"?\n\nLinked tasks will remain but lose their goal connection.`))
+    { deleteGoal(id); renderAll(); }
+};
+window.wToggleTask  = id => { toggleTask(id);  renderAll(); };
+window.wDeleteTask  = id => { deleteTask(id);  renderAll(); };
+window.wExpand      = id => { toggleExpand(id); };
+window.wToggleSub   = (tid, sid) => { toggleSubtask(tid, sid); renderTasks(); renderGoals(); };
+window.wDeleteSub   = (tid, sid) => { deleteSubtask(tid, sid); renderTasks(); };
+window.wAddSub      = tid => {
+  const inp = document.getElementById(`sub-${tid}`);
+  if (inp && addSubtask(tid, inp.value)) renderTasks();
+};
+window.wSaveNotes = (tid, val) => saveNotes(tid, val);
+
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════ */
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(s) {
+  if (!s) return '';
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y,m-1,d).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+
+migrate();
+state = DB.load();
+resetRecurring();
+snapshotToday();
+renderAll();
 </script>
 </body>
 </html>
