@@ -1523,6 +1523,7 @@
     <button class="btn btn-ghost btn-sm" onclick="exportData()">⬇ Export data</button>
     <button class="btn btn-ghost btn-sm" onclick="openShare()">🔗 Share progress</button>
     <button class="btn btn-ghost btn-sm" onclick="openOverdueDigest()">⚠️ Overdue digest</button>
+    <button class="btn btn-ghost btn-sm" onclick="deduplicateTasks()" style="border-color:var(--accent-warn,#f59e0b);color:var(--accent-warn,#f59e0b)">🧹 Remove duplicate tasks</button>
   </div>
 </section>
 
@@ -3343,6 +3344,22 @@ function exportData(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`goalDo-export-${todayStr()}.json`;
   a.click();URL.revokeObjectURL(url);
+}
+
+function deduplicateTasks(){
+  const seen=new Map();
+  const deduped=[];
+  state.tasks.forEach(t=>{
+    const key=(t.name||'').trim().toLowerCase();
+    if(!seen.has(key)){seen.set(key,true);deduped.push(t);}
+  });
+  const removed=state.tasks.length-deduped.length;
+  if(removed===0){alert('No duplicate tasks found.');return;}
+  if(!confirm(`Found ${removed} duplicate task${removed!==1?'s':''} (same name). Remove them and keep the first of each?`))return;
+  state.tasks=deduped;
+  persist();
+  renderAll();
+  alert(`Removed ${removed} duplicate task${removed!==1?'s':''}.`);
 }
 
 // ─── FOCUS SESSION ───────────────────────────────────────────────────────────
