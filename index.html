@@ -3169,9 +3169,9 @@ function parseNaturalLanguage(raw){
       text=text.replace(dateMatch[0],'').trim();
     }
   }
-  // Clean up double spaces and update field only if name differs enough
+  // Only rewrite the field when a keyword was actually stripped (not just trailing spaces)
   text=text.replace(/\s{2,}/g,' ').trim();
-  if(text&&text!==raw){const ni=document.getElementById('t-name');if(ni&&ni.value===raw){ni.value=text;nlLastParsed=text;}}
+  if(text&&text!==raw.trim()){const ni=document.getElementById('t-name');if(ni&&ni.value===raw){ni.value=text;nlLastParsed=text;}}
 }
 
 // ─── GOAL HEALTH SCORE ───────────────────────────────────────────────────────
