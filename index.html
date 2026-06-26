@@ -423,6 +423,37 @@
       .focus-panel{padding:24px;}
       .hdr{padding:0 16px;}
     }
+
+    /* DAILY PROGRESS CARD */
+    .daily-progress-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:18px 20px;
+      margin-bottom:16px;
+      box-shadow:var(--shadow);
+      transition:all .2s ease;
+    }
+    .daily-progress-card:hover{
+      border-color:var(--border-strong);
+    }
+    .daily-progress-info{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .daily-progress-title{
+      font-size:.9rem;
+      font-weight:700;
+      color:var(--text);
+      letter-spacing:-0.01em;
+    }
+    .daily-progress-stats{
+      font-size:.8rem;
+      font-weight:600;
+      color:var(--text-2);
+    }
   </style>
 </head>
 <body>
@@ -514,6 +545,16 @@
 
 <!-- TASKS TAB -->
 <section class="tab-panel" id="tab-tasks">
+  <div class="daily-progress-card" id="daily-progress-card">
+    <div class="daily-progress-info">
+      <span class="daily-progress-title">🌅 Daily Progress</span>
+      <span class="daily-progress-stats" id="daily-progress-stats">No tasks scheduled for today</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="daily-progress-fill" style="width: 0%"></div>
+    </div>
+  </div>
+
   <div class="form-card">
     <div class="sec-title" style="margin-bottom:12px">New Task</div>
     <div class="form-row">
@@ -990,6 +1031,35 @@ function renderTasks(){
   }).join('')+'</div>';
   renderTagFilterRow();
   initDrag();
+  updateDailyProgressBar();
+}
+
+function updateDailyProgressBar(){
+  const today = todayStr();
+  const todayTasks = state.tasks.filter(t => t.dueDate === today);
+  const total = todayTasks.length;
+  const completed = todayTasks.filter(t => t.done).length;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  
+  const statsEl = document.getElementById('daily-progress-stats');
+  const fillEl = document.getElementById('daily-progress-fill');
+  
+  if (statsEl) {
+    if (total > 0) {
+      statsEl.innerHTML = `<b>${completed}</b> of <b>${total}</b> tasks completed (${pct}%)`;
+    } else {
+      statsEl.textContent = 'No tasks scheduled for today';
+    }
+  }
+  
+  if (fillEl) {
+    fillEl.style.width = pct + '%';
+    if (pct === 100 && total > 0) {
+      fillEl.classList.add('success');
+    } else {
+      fillEl.classList.remove('success');
+    }
+  }
 }
 
 // ─── WEEK VIEW ───────────────────────────────────────────────────────────────
