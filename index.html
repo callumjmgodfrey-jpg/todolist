@@ -1040,17 +1040,17 @@
   
   <div class="tab-dropdown" id="tab-dropdown">
     <button class="tab-dropdown-trigger" onclick="toggleTabDropdown(event)" id="tab-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
-      <span id="active-tab-text">任務 Tasks</span>
+      <span id="active-tab-text">📊 Dashboard</span>
       <span class="chevron-icon" style="display:inline-block;transition:transform .2s ease;font-size:0.75rem;color:var(--accent);">▼</span>
     </button>
     <div class="tab-dropdown-menu" id="tab-dropdown-menu" role="menu">
+      <a href="#" class="tab-btn active" onclick="selectTab('dashboard'); return false;" role="menuitem">📊 Dashboard</a>
       <a href="#" class="tab-btn" onclick="selectTab('goals'); return false;" role="menuitem">目標 Goals</a>
-      <a href="#" class="tab-btn active" onclick="selectTab('tasks'); return false;" role="menuitem">任務 Tasks</a>
+      <a href="#" class="tab-btn" onclick="selectTab('tasks'); return false;" role="menuitem">任務 Tasks</a>
       <a href="#" class="tab-btn" onclick="selectTab('habits'); return false;" role="menuitem">習慣 Habits</a>
       <a href="#" class="tab-btn" onclick="selectTab('review'); return false;" role="menuitem">省察 Review</a>
       <a href="#" class="tab-btn" onclick="selectTab('reminders'); return false;" role="menuitem">通知 Reminders</a>
       <a href="#" class="tab-btn" onclick="selectTab('ai'); return false;" role="menuitem">導師 AI Coach</a>
-      <a href="#" class="tab-btn" onclick="selectTab('dashboard'); return false;" role="menuitem">📊 Dashboard</a>
     </div>
   </div>
 
@@ -1110,7 +1110,7 @@
 </section>
 
 <!-- TASKS TAB -->
-<section class="tab-panel active" id="tab-tasks">
+<section class="tab-panel" id="tab-tasks">
   <div class="daily-progress-card" id="daily-progress-card">
     <div class="daily-progress-info">
       <span class="daily-progress-title">🌅 Daily Progress</span>
@@ -1301,7 +1301,7 @@
 </section><!-- /tab-ai -->
 
 <!-- DASHBOARD TAB -->
-<section class="tab-panel" id="tab-dashboard">
+<section class="tab-panel active" id="tab-dashboard">
   <div class="sec-hdr"><div class="sec-title">📊 Dashboard</div></div>
   <div class="dash-grid">
     <div class="dash-card">
@@ -2283,6 +2283,7 @@ function switchTab(tab){
 
   // Update dropdown trigger label
   const labelMap = {
+    'dashboard': '📊 Dashboard',
     'goals': 'Goals',
     'tasks': 'Tasks',
     'habits': 'Habits',
@@ -2463,7 +2464,7 @@ function renderDashboard(){
 }
 
 // ─── RENDER ALL ──────────────────────────────────────────────────────────────
-function renderAll(){renderGoals();renderTasks();renderHabits();refreshGoalDrop();const active=document.querySelector('.tab-panel.active');if(active&&active.id==='tab-review')renderReview();if(active&&active.id==='tab-dashboard')renderDashboard();}
+function renderAll(){renderGoals();renderTasks();renderHabits();refreshGoalDrop();renderDashboard();const active=document.querySelector('.tab-panel.active');if(active&&active.id==='tab-review')renderReview();}
 
 // ─── CLOUD SYNC ──────────────────────────────────────────────────────────────
 let db=null,currentUser=null,syncTimeout=null;
