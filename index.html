@@ -74,6 +74,16 @@
       --danger:#d32f2f;--danger-light:#fef2f2;
       --hdr-bg:rgba(252, 250, 242, 0.9);
     }
+    [data-theme="oled"]{
+      --bg:#000000;--surface:#0a0a0a;--surface-2:#111111;
+      --border:#222222;--border-strong:#333333;
+      --text:#ffffff;--text-2:#a0a0a0;--text-3:#555555;
+      --accent:#ef4444;--accent-light:#1a0000;--accent-dark:#b91c1c;
+      --success:#10b981;--success-light:#001a0d;
+      --warning:#f59e0b;--warning-light:#1a1000;--danger-light:#1a0000;
+      --shadow:0 1px 3px rgba(0,0,0,.8);--shadow-md:0 4px 12px rgba(0,0,0,.9);
+      --hdr-bg:rgba(0,0,0,0.95);
+    }
 
     body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background-color .3s,color .3s;}
     body.timer-on .main{padding-top:calc(var(--hdr) + 48px);}
@@ -694,6 +704,57 @@
     /* NOTIF */
     .notif-section{max-width:440px;}
 
+    /* STREAK CALENDAR */
+    .streak-cal{display:grid;grid-template-columns:repeat(53,1fr);gap:2px;margin-top:8px;overflow-x:auto;}
+    .sc-cell{aspect-ratio:1;border-radius:2px;background:var(--border);min-width:10px;}
+    .sc-cell.l1{background:color-mix(in srgb,var(--accent) 25%,var(--border));}
+    .sc-cell.l2{background:color-mix(in srgb,var(--accent) 50%,var(--border));}
+    .sc-cell.l3{background:color-mix(in srgb,var(--accent) 75%,var(--border));}
+    .sc-cell.l4{background:var(--accent);}
+    .sc-month-labels{display:flex;gap:0;margin-bottom:2px;font-size:.62rem;color:var(--text-3);}
+    .sc-month-labels span{flex:1;text-align:left;}
+
+    /* PERSONAL RECORDS */
+    .records-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+    .record-card{background:var(--surface-2);border-radius:var(--radius);padding:12px;text-align:center;}
+    .record-val{font-size:1.6rem;font-weight:900;color:var(--accent);}
+    .record-lbl{font-size:.72rem;color:var(--text-2);margin-top:2px;}
+    .record-new{font-size:.68rem;color:var(--success);font-weight:700;}
+
+    /* GOAL CHECK-INS */
+    .checkin-stars{display:flex;gap:4px;margin:6px 0;}
+    .checkin-star{font-size:1.2rem;cursor:pointer;opacity:.3;transition:opacity .15s;}
+    .checkin-star.on{opacity:1;}
+    .checkin-sparkline{display:flex;gap:2px;align-items:flex-end;height:20px;margin-top:4px;}
+    .cs-bar{width:6px;border-radius:2px 2px 0 0;background:var(--accent);opacity:.7;}
+
+    /* TASK TEMPLATES */
+    .tpl-task-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+    .tpl-task-card:hover{border-color:var(--accent);}
+    .tpl-task-name{flex:1;font-size:.85rem;font-weight:600;}
+    .tpl-task-meta{font-size:.72rem;color:var(--text-3);}
+
+    /* SWIPE ACTIONS */
+    .task-swipe-wrap{position:relative;overflow:hidden;}
+    .swipe-hint-done{position:absolute;left:0;top:0;bottom:0;width:60px;background:var(--success);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;opacity:0;pointer-events:none;transition:opacity .15s;}
+    .swipe-hint-del{position:absolute;right:0;top:0;bottom:0;width:60px;background:var(--danger);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;opacity:0;pointer-events:none;transition:opacity .15s;}
+
+    /* SCHEDULE VIEW */
+    .schedule-row{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);}
+    .schedule-row:last-child{border-bottom:none;}
+    .schedule-time{font-size:.75rem;color:var(--text-3);width:40px;flex-shrink:0;padding-top:2px;}
+    .schedule-block{flex:1;background:var(--accent-light);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:5px 8px;font-size:.82rem;font-weight:500;}
+    .schedule-dur{font-size:.7rem;color:var(--text-3);margin-top:1px;}
+
+    /* DASHBOARD WIDGET REORDER */
+    .dash-widget-handle{cursor:grab;color:var(--text-3);font-size:.9rem;margin-right:6px;}
+    .dash-widget-header{display:flex;align-items:center;margin-bottom:12px;}
+    .dash-widget-title{flex:1;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);}
+    .dash-card.drag-over-widget{outline:2px dashed var(--accent);}
+
+    /* SUB-GOALS */
+    .subgoal-indent{margin-left:20px;border-left:2px solid var(--border);padding-left:12px;margin-top:6px;}
+
     /* ONBOARDING */
     #ob-overlay{position:fixed;inset:0;background:var(--bg);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
     .ob-panel{width:min(94vw,460px);text-align:center;}
@@ -1108,6 +1169,9 @@
       <div class="form-group"><label>Target <span style="font-weight:400;color:var(--text-2)">(optional)</span></label><input type="number" id="g-target" placeholder="e.g. 50" min="1" /></div>
     </div>
     <div class="form-row">
+      <div class="form-group"><label>Parent goal <span style="font-weight:400;color:var(--text-2)">(optional sub-goal)</span></label><select id="g-parent"><option value="">— None (top-level) —</option></select></div>
+    </div>
+    <div class="form-row">
       <div class="form-group"><label>Description (optional)</label><textarea id="g-desc" placeholder="Why this goal matters…"></textarea></div>
     </div>
     <div class="form-actions"><button class="btn btn-primary" id="add-goal-btn">Add Goal</button></div>
@@ -1138,7 +1202,7 @@
   </div>
 
   <div class="form-card">
-    <div class="sec-title" style="margin-bottom:12px">新規任務 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">New Task</span></div>
+    <div class="sec-hdr"><div class="sec-title">新規任務 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">New Task</span></div><div style="display:flex;gap:8px"><button class="link-btn" onclick="openTaskTemplates()">Use template →</button><button class="link-btn" onclick="wSaveTaskTemplate()">Save as template</button></div></div>
     <div class="form-row">
       <div class="form-group" style="flex:2"><label>Task Name</label><input type="text" id="t-name" placeholder="What needs doing?" /></div>
       <div class="form-group"><label>Priority</label><select id="t-priority"><option value="none">— None</option><option value="high">🔴 High</option><option value="medium">🟡 Medium</option><option value="low">🔵 Low</option></select></div>
@@ -1229,10 +1293,21 @@
     <button class="btn btn-primary btn-sm" onclick="saveJournal()">Save note</button>
     <div id="journal-history" style="margin-top:12px;"></div>
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="review-card" style="margin-bottom:14px">
+    <h4>年間記録 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Year in pixels</span></h4>
+    <div class="sc-month-labels" id="sc-month-labels"></div>
+    <div class="streak-cal" id="streak-cal"></div>
+    <div style="font-size:.72rem;color:var(--text-3);margin-top:6px">Each cell = one day. Darker = more tasks completed.</div>
+  </div>
+  <div class="review-card" style="margin-bottom:14px">
+    <h4>🏆 Personal Records</h4>
+    <div class="records-grid" id="records-grid"></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
     <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
     <button class="btn btn-ghost btn-sm" onclick="exportICal()">Export iCal</button>
     <button class="btn btn-ghost btn-sm" onclick="exportPDF()">Print / PDF</button>
+    <button class="btn btn-ghost btn-sm" onclick="copyWeeklyDigest()">📋 Copy weekly digest</button>
   </div>
 </section>
 
@@ -1331,12 +1406,27 @@
     <div class="dash-card-title">Upcoming — next 7 days</div>
     <div id="dash-upcoming"></div>
   </div>
-  <div class="dash-card">
-    <div class="dash-card-title">Time logged this week</div>
-    <div id="dash-time"></div>
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="dash-card-title">Time logged this week</div>
+      <div id="dash-time"></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-title">📅 Suggested schedule</div>
+      <div id="dash-schedule"></div>
+    </div>
   </div>
 </section><!-- /tab-dashboard -->
 </main>
+
+<!-- TASK TEMPLATES MODAL -->
+<div class="modal-overlay" id="task-tpl-overlay">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-title">Task Templates</div>
+    <button class="modal-close" onclick="closeTaskTemplates()">×</button>
+    <div id="task-tpl-list"></div>
+  </div>
+</div>
 
 <!-- HABIT MONTHLY MODAL -->
 <div class="modal-overlay" id="habit-monthly-overlay">
@@ -1496,7 +1586,11 @@ function loadState(){
       s.settings=s.settings||{theme:'auto'};
       s.history=s.history||{};
       s.journal=s.journal||{};
-      s.goals=(s.goals||[]).map(g=>({...g,milestones:g.milestones||[],notes:g.notes||'',mode:g.mode||'oneoff',unit:g.unit||'completions',target:g.target||0,score:g.score||0}));
+      s.goals=(s.goals||[]).map(g=>({...g,milestones:g.milestones||[],notes:g.notes||'',mode:g.mode||'oneoff',unit:g.unit||'completions',target:g.target||0,score:g.score||0,checkins:g.checkins||[],parentId:g.parentId||''}));
+      s.taskTemplates=s.taskTemplates||[];
+      s.records=s.records||{bestStreak:0,mostTasksDay:0,mostPomos:0};
+      s.settings.dashOrder=s.settings.dashOrder||['overview','cats','today','upcoming','time'];
+      s.settings.dashHidden=s.settings.dashHidden||[];
       s.tasks=(s.tasks||[]).map(t=>({...t,priority:t.priority||'none',tags:t.tags||[],estimate:t.estimate||0,recurringDays:t.recurringDays||[],timeLog:t.timeLog||[],blockedBy:t.blockedBy||[]}));
       return s;
     }
@@ -1512,8 +1606,8 @@ function loadState(){
 function persist(){localStorage.setItem(KEY,JSON.stringify(state));if(typeof saveToCloud==='function')saveToCloud();}
 
 // ─── THEME ───────────────────────────────────────────────────────────────────
-const THEMES=['auto','light','dark'];
-const THEME_ICONS={auto:'🌙',light:'☀️',dark:'🌑'};
+const THEMES=['auto','light','dark','oled'];
+const THEME_ICONS={auto:'🌙',light:'☀️',dark:'🌑',oled:'⚫'};
 function cycleTheme(){const cur=state.settings.theme||'auto';const next=THEMES[(THEMES.indexOf(cur)+1)%THEMES.length];state.settings.theme=next;persist();applyTheme(next);}
 function applyTheme(t){document.getElementById('root').setAttribute('data-theme',t);const b=document.getElementById('theme-btn');if(b)b.textContent=THEME_ICONS[t]||'🌙';}
 
@@ -1565,7 +1659,7 @@ function addGoal(){
   const title=document.getElementById('g-title').value.trim();
   if(!title){alert('Enter a goal title.');return null;}
   const mode=document.getElementById('g-mode').value;
-  const g={id:uid(),title,type:document.getElementById('g-type').value,category:document.getElementById('g-cat').value,desc:document.getElementById('g-desc').value.trim(),deadline:document.getElementById('g-deadline').value,archived:false,createdAt:todayStr(),milestones:[],notes:'',mode,unit:(document.getElementById('g-unit').value.trim()||'completions'),target:parseInt(document.getElementById('g-target').value||'0')||0,score:0};
+  const g={id:uid(),title,type:document.getElementById('g-type').value,category:document.getElementById('g-cat').value,desc:document.getElementById('g-desc').value.trim(),deadline:document.getElementById('g-deadline').value,archived:false,createdAt:todayStr(),milestones:[],notes:'',mode,unit:(document.getElementById('g-unit').value.trim()||'completions'),target:parseInt(document.getElementById('g-target').value||'0')||0,score:0,checkins:[],parentId:document.getElementById('g-parent').value||''};
   state.goals.push(g);
   if(pendingTplTasks){pendingTplTasks.forEach(name=>state.tasks.push({id:uid(),name,goalId:g.id,dueDate:'',recurring:'none',priority:'none',tags:[],estimate:0,notes:'',subtasks:[],done:false,lastReset:'',createdAt:todayStr()}));pendingTplTasks=null;}
   persist();
@@ -1678,6 +1772,7 @@ function renderGoals(){
         `}
         ${ms.length?`<div style="font-size:.74rem;color:var(--text-2);margin-top:3px">Milestones: ${msDone}/${ms.length}</div>`:''}
         ${msSection}
+        ${checkinStars(g.id,g.checkins)}
         <div class="goal-notes-section">
           <div style="font-size:.72rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Notes</div>
           <textarea id="gnotes-${esc(g.id)}" class="goal-notes-ta" rows="2" placeholder="Scratchpad for this goal…" onblur="wSaveGoalNotes('${esc(g.id)}')">${esc(g.notes||'')}</textarea>
@@ -1932,6 +2027,7 @@ function renderTasks(){
   }).join('')+'</div>';
   renderTagFilterRow();
   initDrag();
+  initSwipe();
   updateDailyProgressBar();
 }
 
@@ -2268,6 +2364,9 @@ function renderReview(){
   }
 
   renderJournalHistory();
+  renderStreakCal();
+  updateRecords();
+  renderRecords();
 }
 
 // ─── SEARCH ──────────────────────────────────────────────────────────────────
@@ -2573,10 +2672,167 @@ function renderDashboard(){
   const topTimed=[...state.tasks].filter(t=>totalLogged(t)>0).sort((a,b)=>totalLogged(b)-totalLogged(a)).slice(0,5);
   document.getElementById('dash-time').innerHTML=`<div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin-bottom:10px">${fmtMins(weekMins)} this week</div>`+
     (topTimed.length?topTimed.map(t=>`<div class="dash-stat-row"><span>${esc(t.name)}</span><b>${fmtMins(totalLogged(t))}</b></div>`).join(''):'<p style="font-size:.82rem;color:var(--text-3)">No time logged yet. Use the ⏱ button on tasks.</p>');
+  renderSchedule();
+}
+
+// ─── OLED / THEME ────────────────────────────────────────────────────────────
+// cycleTheme already handles oled via THEMES array
+
+// ─── STREAK CALENDAR ─────────────────────────────────────────────────────────
+function renderStreakCal(){
+  const calEl=document.getElementById('streak-cal');const lblEl=document.getElementById('sc-month-labels');
+  if(!calEl)return;
+  const today=new Date();const end=new Date(today);
+  const start=new Date(today);start.setFullYear(start.getFullYear()-1);start.setDate(start.getDate()+1);
+  // pad to Monday
+  const startDay=start.getDay();const pad=startDay===0?6:startDay-1;
+  const cells=[];for(let i=0;i<pad;i++)cells.push(null);
+  const d=new Date(start);
+  while(d<=end){cells.push(new Date(d));d.setDate(d.getDate()+1);}
+  // fill to full week
+  while(cells.length%7!==0)cells.push(null);
+  // max tasks in a day for color scale
+  const counts=cells.filter(Boolean).map(dt=>{const k=dt.toISOString().slice(0,10);const h=state.history[k]||{};return h.done||0;});
+  const max=Math.max(1,...counts);
+  calEl.innerHTML=cells.map(dt=>{
+    if(!dt)return`<div></div>`;
+    const k=dt.toISOString().slice(0,10);const h=state.history[k]||{};const n=h.done||0;
+    const lvl=n===0?'':n/max<.25?'l1':n/max<.5?'l2':n/max<.75?'l3':'l4';
+    return`<div class="sc-cell ${lvl}" title="${k}: ${n} tasks done"></div>`;
+  }).join('');
+  // month labels — one per ~4.3 weeks column
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const weeks=Math.ceil(cells.length/7);let lblHtml='';let lastMo=-1;
+  for(let w=0;w<weeks;w++){const cell=cells[w*7];if(!cell){lblHtml+='<span></span>';continue;}const mo=cell.getMonth();if(mo!==lastMo){lblHtml+=`<span>${months[mo]}</span>`;lastMo=mo;}else lblHtml+='<span></span>';}
+  lblEl.innerHTML=lblHtml;
+}
+
+// ─── PERSONAL RECORDS ────────────────────────────────────────────────────────
+function updateRecords(){
+  const r=state.records=state.records||{bestStreak:0,mostTasksDay:0,mostPomos:0};
+  const{streak}=calcStreak();let newRecord=false;
+  if(streak>r.bestStreak){r.bestStreak=streak;newRecord=true;}
+  const today=todayStr();const todayDone=(state.history[today]||{}).done||0;
+  if(todayDone>r.mostTasksDay){r.mostTasksDay=todayDone;newRecord=true;}
+  const todayPomos=(state.history[today]||{}).pomodoros||0;
+  if(todayPomos>r.mostPomos){r.mostPomos=todayPomos;newRecord=true;}
+  if(newRecord)persist();
+}
+function renderRecords(){
+  const el=document.getElementById('records-grid');if(!el)return;
+  const r=state.records||{};
+  const{streak}=calcStreak();
+  const isNewStreak=streak>0&&streak>=(r.bestStreak||0);
+  el.innerHTML=`
+    <div class="record-card"><div class="record-val">${r.bestStreak||0}</div><div class="record-lbl">🔥 Longest streak (days)</div>${isNewStreak&&streak===r.bestStreak?'<div class="record-new">★ Current best!</div>':''}</div>
+    <div class="record-card"><div class="record-val">${r.mostTasksDay||0}</div><div class="record-lbl">✅ Most tasks in a day</div></div>
+    <div class="record-card"><div class="record-val">${r.mostPomos||0}</div><div class="record-lbl">🍅 Most pomodoros in a day</div></div>
+    <div class="record-card"><div class="record-val">${Object.values(state.history).reduce((a,h)=>a+(h.done||0),0)}</div><div class="record-lbl">📊 Total tasks completed</div></div>
+  `;
+}
+
+// ─── WEEKLY DIGEST ────────────────────────────────────────────────────────────
+function copyWeeklyDigest(){
+  const{streak}=calcStreak();
+  const days7=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days7.push(d.toISOString().slice(0,10));}
+  const done7=days7.reduce((a,d)=>a+((state.history[d]||{}).done||0),0);
+  const goals=state.goals.filter(g=>!g.archived).map(g=>{const p=goalProgress(g.id);return`  • ${g.title}: ${p.pct}%`;}).join('\n');
+  const habits=state.habits.map(h=>`  • ${h.emoji} ${h.name}: ${habitStreak(h)}d streak`).join('\n');
+  const text=`📊 GoalDo Weekly Digest — ${new Date().toDateString()}\n\n✅ Tasks completed this week: ${done7}\n🔥 Current streak: ${streak} days\n\n🎯 Goals:\n${goals||'  No active goals'}\n\n🌱 Habits:\n${habits||'  No habits tracked'}\n\nGenerated by GoalDo`;
+  navigator.clipboard.writeText(text).then(()=>alert('Weekly digest copied to clipboard!')).catch(()=>alert(text));
+}
+
+// ─── TASK TEMPLATES ──────────────────────────────────────────────────────────
+function openTaskTemplates(){
+  const el=document.getElementById('task-tpl-list');
+  const tmpls=state.taskTemplates||[];
+  if(!tmpls.length){el.innerHTML='<p style="font-size:.83rem;color:var(--text-3);padding:8px 0">No templates saved yet. Fill in the task form and click "Save as template".</p>';}
+  else{el.innerHTML=tmpls.map((t,i)=>`<div class="tpl-task-card" onclick="applyTaskTemplate(${i})"><div style="flex:1"><div class="tpl-task-name">${esc(t.name)}</div><div class="tpl-task-meta">${t.priority!=='none'?t.priority+' · ':''}${t.estimate?t.estimate+'m · ':''}${t.recurring!=='none'?t.recurring+' · ':''}</div></div><button onclick="event.stopPropagation();deleteTaskTemplate(${i})" style="background:none;border:none;color:var(--text-3);cursor:pointer">✕</button></div>`).join('');}
+  document.getElementById('task-tpl-overlay').classList.add('open');
+}
+function closeTaskTemplates(){document.getElementById('task-tpl-overlay').classList.remove('open');}
+window.wSaveTaskTemplate=()=>{
+  const name=document.getElementById('t-name').value.trim();if(!name){alert('Enter a task name first.');return;}
+  const recur=document.getElementById('t-recur').value;
+  const tpl={name,goalId:document.getElementById('t-goal').value,recurring:recur,recurringDays:recur==='days'?getSelectedDays():[],priority:document.getElementById('t-priority').value,tags:parseTags(document.getElementById('t-tags').value||''),estimate:parseInt(document.getElementById('t-estimate').value||'0')||0,notes:''};
+  state.taskTemplates=state.taskTemplates||[];state.taskTemplates.push(tpl);persist();
+  alert(`Template "${name}" saved!`);
+};
+function applyTaskTemplate(i){
+  const t=state.taskTemplates[i];closeTaskTemplates();
+  document.getElementById('t-name').value=t.name;
+  document.getElementById('t-goal').value=t.goalId||'';
+  document.getElementById('t-recur').value=t.recurring||'none';
+  document.getElementById('t-priority').value=t.priority||'none';
+  document.getElementById('t-tags').value=(t.tags||[]).join(', ');
+  document.getElementById('t-estimate').value=t.estimate||'';
+  toggleDayPicker(t.recurring);
+}
+function deleteTaskTemplate(i){state.taskTemplates.splice(i,1);persist();openTaskTemplates();}
+
+// ─── GOAL CHECK-INS ──────────────────────────────────────────────────────────
+window.wCheckin=(gid,rating)=>{
+  const g=state.goals.find(x=>x.id===gid);if(!g)return;
+  g.checkins=g.checkins||[];
+  const today=todayStr();
+  const existing=g.checkins.find(c=>c.date===today);
+  if(existing)existing.rating=rating;else g.checkins.push({date:today,rating});
+  persist();renderGoals();
+};
+function checkinSparkline(checkins){
+  if(!checkins||!checkins.length)return'';
+  const last8=checkins.slice(-8);
+  return`<div class="checkin-sparkline">${last8.map(c=>`<div class="cs-bar" style="height:${c.rating/5*20}px;opacity:${.4+c.rating/5*.6}" title="${c.date}: ${c.rating}/5"></div>`).join('')}</div>`;
+}
+function checkinStars(gid,checkins){
+  const today=todayStr();const todayRating=(checkins||[]).find(c=>c.date===today)?.rating||0;
+  return`<div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px;"><div style="font-size:.72rem;color:var(--text-2);margin-bottom:4px">Today's check-in</div><div class="checkin-stars">${[1,2,3,4,5].map(n=>`<span class="checkin-star${n<=todayRating?' on':''}" onclick="wCheckin('${esc(gid)}',${n})">★</span>`).join('')}</div>${checkinSparkline(checkins)}</div>`;
+}
+
+// ─── GOAL RELATIONSHIPS / PARENT ────────────────────────────────────────────
+function refreshParentDrop(){
+  const sel=document.getElementById('g-parent');if(!sel)return;
+  const active=state.goals.filter(g=>!g.archived);
+  sel.innerHTML='<option value="">— None (top-level) —</option>'+active.map(g=>`<option value="${esc(g.id)}">${esc(g.title)}</option>`).join('');
+}
+
+// ─── SCHEDULE VIEW ───────────────────────────────────────────────────────────
+function renderSchedule(){
+  const el=document.getElementById('dash-schedule');if(!el)return;
+  const today=todayStr();
+  const tasks=state.tasks.filter(t=>t.dueDate===today&&!t.done&&t.estimate>0)
+    .sort((a,b)=>(({high:0,medium:1,low:2,none:3})[a.priority||'none'])-({high:0,medium:1,low:2,none:3})[b.priority||'none']);
+  if(!tasks.length){el.innerHTML='<p style="font-size:.82rem;color:var(--text-3)">Add time estimates to today\'s tasks to see a schedule.</p>';return;}
+  const START_H=9;let mins=START_H*60;
+  el.innerHTML=tasks.map(t=>{
+    const hh=Math.floor(mins/60)%24;const mm=mins%60;
+    const label=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+    mins+=t.estimate+5;
+    return`<div class="schedule-row"><div class="schedule-time">${label}</div><div class="schedule-block">${esc(t.name)}<div class="schedule-dur">${t.estimate}m</div></div></div>`;
+  }).join('');
+}
+
+// ─── SWIPE ACTIONS ───────────────────────────────────────────────────────────
+function initSwipe(){
+  document.querySelectorAll('.task-item').forEach(el=>{
+    let startX=0,dx=0,id=el.dataset.id;
+    el.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;dx=0;},{passive:true});
+    el.addEventListener('touchmove',e=>{
+      dx=e.touches[0].clientX-startX;
+      el.style.transform=`translateX(${Math.max(-80,Math.min(80,dx))}px)`;
+      el.style.transition='none';
+    },{passive:true});
+    el.addEventListener('touchend',()=>{
+      el.style.transition='transform .2s ease';
+      if(dx>60){wToggleTask(id);}
+      else if(dx<-60){if(confirm('Delete task?'))wDeleteTask(id);}
+      else el.style.transform='';
+    });
+  });
 }
 
 // ─── RENDER ALL ──────────────────────────────────────────────────────────────
-function renderAll(){renderGoals();renderTasks();renderHabits();refreshGoalDrop();renderDashboard();const active=document.querySelector('.tab-panel.active');if(active&&active.id==='tab-review')renderReview();}
+function renderAll(){renderGoals();renderTasks();renderHabits();refreshGoalDrop();refreshParentDrop();renderDashboard();const active=document.querySelector('.tab-panel.active');if(active&&active.id==='tab-review')renderReview();}
 
 // ─── CLOUD SYNC ──────────────────────────────────────────────────────────────
 let db=null,currentUser=null,syncTimeout=null;
