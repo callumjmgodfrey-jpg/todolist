@@ -785,6 +785,16 @@
     .time-logged{font-size:.72rem;color:var(--text-3);}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
 
+    /* TODAY'S TASKS DASHBOARD */
+    .today-task-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+    .today-task-row:last-child{border-bottom:none;}
+    .today-task-order{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .today-task-order.overdue{background:var(--warning);}
+    .today-task-name{flex:1;font-size:.85rem;font-weight:500;}
+    .today-task-name.done-name{text-decoration:line-through;color:var(--text-3);}
+    .today-task-meta{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+    .suggest-reason{font-size:.7rem;color:var(--text-3);margin-top:2px;}
+
     /* TASK DEPENDENCIES */
     .task-blocked{opacity:.5;pointer-events:none;}
     .dep-badge{font-size:.7rem;color:var(--warning);font-weight:600;}
@@ -1312,6 +1322,13 @@
       <div class="dash-card-title">Goals by category</div>
       <div id="dash-cats"></div>
     </div>
+  </div>
+  <div class="dash-card" style="margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="dash-card-title" style="margin-bottom:0">Today's tasks</div>
+      <button class="btn btn-primary btn-sm" id="dash-apply-order-btn" onclick="wApplySuggestedOrder()" style="display:none">↑↓ Apply this order</button>
+    </div>
+    <div id="dash-today-tasks"></div>
   </div>
   <div class="dash-card" style="margin-bottom:14px">
     <div class="dash-card-title">Upcoming — next 7 days</div>
@@ -2415,6 +2432,26 @@ window.submitWeeklyReview=()=>{
 };
 window.openWeeklyReview=()=>document.getElementById('weekly-review-overlay').classList.add('open');
 
+window.wApplySuggestedOrder=()=>{
+  const todayS=todayStr();
+  const PRIO_SCORE={high:0,medium:1,low:2,none:3};
+  const todayIds=new Set(state.tasks.filter(t=>t.dueDate===todayS).map(t=>t.id));
+  const todaySorted=[...state.tasks].filter(t=>todayIds.has(t.id)).sort((a,b)=>{
+    if(a.done!==b.done)return a.done?1:-1;
+    const pd=(PRIO_SCORE[a.priority||'none'])-(PRIO_SCORE[b.priority||'none']);
+    if(pd!==0)return pd;
+    return (a.estimate||999)-(b.estimate||999);
+  });
+  const rest=state.tasks.filter(t=>!todayIds.has(t.id));
+  state.tasks=[...todaySorted,...rest];
+  persist();
+  renderTasks();
+  renderDashboard();
+  // Brief visual feedback
+  const btn=document.getElementById('dash-apply-order-btn');
+  if(btn){const orig=btn.textContent;btn.textContent='✓ Applied!';btn.disabled=true;setTimeout(()=>{btn.textContent=orig;btn.disabled=false;},1500);}
+};
+
 // ─── DASHBOARD ───────────────────────────────────────────────────────────────
 function renderDashboard(){
   const today=new Date();const todayS=todayStr();
@@ -2446,6 +2483,55 @@ function renderDashboard(){
     const w=Math.round(n/maxCat*100);
     return`<div class="dash-cat-bar-wrap"><div class="dash-cat-label"><span>${cat.label}</span><span>${n}</span></div><div class="dash-cat-bar"><div class="dash-cat-fill" style="width:${w}%;background:${cat.color}"></div></div></div>`;
   }).join('')||'<p style="font-size:.82rem;color:var(--text-3)">No goals yet.</p>';
+
+  // Today's tasks with suggested order
+  const PRIO_SCORE={high:0,medium:1,low:2,none:3};
+  const todayTasks=allTasks.filter(t=>t.dueDate===todayS);
+  const suggested=[...todayTasks].sort((a,b)=>{
+    // Overdue-style urgency: undone first, done last
+    if(a.done!==b.done)return a.done?1:-1;
+    // Priority first
+    const pd=(PRIO_SCORE[a.priority||'none'])-(PRIO_SCORE[b.priority||'none']);
+    if(pd!==0)return pd;
+    // Within same priority: shorter tasks first (quick wins build momentum)
+    const ae=a.estimate||999,be=b.estimate||999;
+    return ae-be;
+  });
+
+  function suggestReason(t,i){
+    if(t.done)return'✓ Done';
+    if(i===0&&(t.priority==='high'||isOverdue(t)))return'🔥 Tackle this first';
+    if(t.priority==='high')return'⚡ High priority';
+    if(t.priority==='medium')return'📌 Medium priority';
+    if(t.estimate&&t.estimate<=15)return'⚡ Quick win ('+t.estimate+'m)';
+    if(t.estimate)return'⏱ '+t.estimate+'m estimated';
+    return'📋 Scheduled today';
+  }
+
+  const applyBtn=document.getElementById('dash-apply-order-btn');
+  if(todayTasks.length>1&&todayTasks.some(t=>!t.done)){
+    if(applyBtn)applyBtn.style.display='';
+  } else {
+    if(applyBtn)applyBtn.style.display='none';
+  }
+
+  document.getElementById('dash-today-tasks').innerHTML=suggested.length
+    ? suggested.map((t,i)=>{
+        const over=isOverdue(t);
+        return`<div class="today-task-row">
+          <div class="today-task-order${over&&!t.done?' overdue':''}">${t.done?'✓':i+1}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="today-task-name${t.done?' done-name':''}">${esc(t.name)}</div>
+            <div class="suggest-reason">${suggestReason(t,i)}</div>
+          </div>
+          <div class="today-task-meta">
+            ${prioBadgeHtml(t.priority)}
+            ${t.estimate?`<span style="font-size:.72rem;color:var(--text-3)">⏱${t.estimate}m</span>`:''}
+            <input type="checkbox" class="enso-check" ${t.done?'checked':''} onchange="wToggleTask('${esc(t.id)}')" />
+          </div>
+        </div>`;
+      }).join('')
+    : '<p style="font-size:.82rem;color:var(--text-3)">No tasks scheduled for today.</p>';
 
   // Upcoming 7 days
   const days7=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);days7.push(d.toISOString().slice(0,10));}
