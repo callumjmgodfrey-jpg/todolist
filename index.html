@@ -496,6 +496,11 @@
     }
     .filter-tag-btn{background:var(--surface-2);border:1px solid var(--border);border-radius:99px;padding:4px 12px;font-size:.78rem;cursor:pointer;color:var(--text-2);transition:all .2s;}
     .filter-tag-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    /* DAY PICKER */
+    .day-picker{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+    .day-btn{background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.75rem;font-weight:600;cursor:pointer;color:var(--text-2);transition:all .12s;min-width:34px;text-align:center;}
+    .day-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .day-pip{font-size:.68rem;font-weight:700;color:var(--accent);}
 
     /* FILTER ROW */
     .filter-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px;}
@@ -1019,7 +1024,17 @@
     <div class="form-row">
       <div class="form-group"><label>Goal</label><select id="t-goal"><option value="">— No goal —</option></select></div>
       <div class="form-group"><label>Due Date</label><input type="date" id="t-due" /></div>
-      <div class="form-group"><label>Recurring</label><select id="t-recur"><option value="none">None</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></div>
+      <div class="form-group"><label>Recurring</label><select id="t-recur" onchange="toggleDayPicker(this.value)"><option value="none">None</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="days">Custom days…</option></select>
+        <div class="day-picker" id="t-day-picker" style="display:none">
+          <button type="button" class="day-btn" data-day="1" onclick="toggleDay(this)">Mo</button>
+          <button type="button" class="day-btn" data-day="2" onclick="toggleDay(this)">Tu</button>
+          <button type="button" class="day-btn" data-day="3" onclick="toggleDay(this)">We</button>
+          <button type="button" class="day-btn" data-day="4" onclick="toggleDay(this)">Th</button>
+          <button type="button" class="day-btn" data-day="5" onclick="toggleDay(this)">Fr</button>
+          <button type="button" class="day-btn" data-day="6" onclick="toggleDay(this)">Sa</button>
+          <button type="button" class="day-btn" data-day="0" onclick="toggleDay(this)">Su</button>
+        </div>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group" style="flex:2"><label>Tags (comma separated)</label><input type="text" id="t-tags" placeholder="e.g. deep-work, health, quick-win" /></div>
@@ -1307,7 +1322,7 @@ function loadState(){
       s.history=s.history||{};
       s.journal=s.journal||{};
       s.goals=(s.goals||[]).map(g=>({...g,milestones:g.milestones||[]}));
-      s.tasks=(s.tasks||[]).map(t=>({...t,priority:t.priority||'none',tags:t.tags||[],estimate:t.estimate||0}));
+      s.tasks=(s.tasks||[]).map(t=>({...t,priority:t.priority||'none',tags:t.tags||[],estimate:t.estimate||0,recurringDays:t.recurringDays||[]}));
       return s;
     }
   }catch(e){}
@@ -1329,7 +1344,15 @@ function applyTheme(t){document.getElementById('root').setAttribute('data-theme'
 
 // ─── RECURRING RESET ─────────────────────────────────────────────────────────
 function getWeekStart(offset){const d=new Date();d.setDate(d.getDate()+offset*7);const day=d.getDay();d.setDate(d.getDate()-(day===0?6:day-1));return d.toISOString().slice(0,10);}
-function resetRecurring(){const today=todayStr();const ws=getWeekStart(0);state.tasks.forEach(t=>{if(t.done&&t.recurring==='daily'&&t.lastReset!==today){t.done=false;t.lastReset=today;}if(t.done&&t.recurring==='weekly'&&t.lastReset<ws){t.done=false;t.lastReset=today;}});persist();}
+function resetRecurring(){
+  const today=todayStr();const ws=getWeekStart(0);const todayDay=new Date().getDay();
+  state.tasks.forEach(t=>{
+    if(t.done&&t.recurring==='daily'&&t.lastReset!==today){t.done=false;t.lastReset=today;}
+    if(t.done&&t.recurring==='weekly'&&t.lastReset<ws){t.done=false;t.lastReset=today;}
+    if(t.recurring==='days'&&(t.recurringDays||[]).includes(todayDay)&&t.lastReset!==today){t.done=false;t.lastReset=today;}
+  });
+  persist();
+}
 
 // ─── HISTORY ─────────────────────────────────────────────────────────────────
 function snapshotToday(){const today=todayStr();const tasks=state.tasks.filter(t=>!t.recurring||t.recurring==='none'||t.dueDate===today);const done=tasks.filter(t=>t.done).length;const existing=state.history[today]||{};state.history[today]={done,total:tasks.length,pomodoros:existing.pomodoros||0};persist();}
@@ -1476,9 +1499,11 @@ function addTask(opts){
   const name=opts?opts.name:document.getElementById('t-name').value.trim();
   if(!name){if(!opts)alert('Enter a task name.');return;}
   const tagsRaw=opts?'':(document.getElementById('t-tags').value||'');
-  const t={id:uid(),name,goalId:opts?(opts.goalId||''):document.getElementById('t-goal').value,dueDate:opts?(opts.dueDate||''):document.getElementById('t-due').value,recurring:opts?'none':document.getElementById('t-recur').value,priority:opts?(opts.priority||'none'):document.getElementById('t-priority').value,tags:opts?[]:(tagsRaw?parseTags(tagsRaw):[]),estimate:opts?0:parseInt(document.getElementById('t-estimate').value||'0')||0,notes:'',subtasks:[],done:false,lastReset:'',createdAt:todayStr()};
+  const recur=opts?'none':document.getElementById('t-recur').value;
+  const recurDays=(!opts&&recur==='days')?getSelectedDays():[];
+  const t={id:uid(),name,goalId:opts?(opts.goalId||''):document.getElementById('t-goal').value,dueDate:opts?(opts.dueDate||''):document.getElementById('t-due').value,recurring:recur,recurringDays:recurDays,priority:opts?(opts.priority||'none'):document.getElementById('t-priority').value,tags:opts?[]:(tagsRaw?parseTags(tagsRaw):[]),estimate:opts?0:parseInt(document.getElementById('t-estimate').value||'0')||0,notes:'',subtasks:[],done:false,lastReset:'',createdAt:todayStr()};
   state.tasks.push(t);persist();
-  if(!opts){document.getElementById('t-name').value='';document.getElementById('t-due').value='';document.getElementById('t-recur').value='none';document.getElementById('t-priority').value='none';document.getElementById('t-tags').value='';document.getElementById('t-estimate').value='';}
+  if(!opts)resetTaskForm();
   renderAll();
 }
 
@@ -1500,6 +1525,21 @@ window.wToggleSub=(tid,sid)=>{const t=state.tasks.find(x=>x.id===tid);if(!t)retu
 window.wDeleteSub=(tid,sid)=>{const t=state.tasks.find(x=>x.id===tid);if(!t)return;t.subtasks=t.subtasks.filter(x=>x.id!==sid);persist();renderTasks();};
 window.wAddSub=tid=>{const inp=document.getElementById('sub-input-'+tid);if(!inp)return;const text=inp.value.trim();if(!text)return;const t=state.tasks.find(x=>x.id===tid);if(!t)return;t.subtasks.push({id:uid(),text,done:false});persist();renderTasks();};
 window.wSaveNotes=tid=>{const ta=document.getElementById('notes-'+tid);if(!ta)return;const t=state.tasks.find(x=>x.id===tid);if(t){t.notes=ta.value;persist();}};
+
+const DAY_NAMES=['Su','Mo','Tu','We','Th','Fr','Sa'];
+function toggleDayPicker(val){const el=document.getElementById('t-day-picker');if(el)el.style.display=val==='days'?'flex':'none';}
+function toggleDay(btn){btn.classList.toggle('on');}
+function getSelectedDays(){return[...document.querySelectorAll('#t-day-picker .day-btn.on')].map(b=>parseInt(b.dataset.day));}
+function recurLabel(t){
+  if(t.recurring==='daily')return'🔄 Daily';
+  if(t.recurring==='weekly')return'🔄 Weekly';
+  if(t.recurring==='days'&&t.recurringDays&&t.recurringDays.length){
+    const sorted=[...t.recurringDays].sort((a,b)=>a===0?7-b:b===0?a-7:a-b);
+    return'🔄 '+sorted.map(d=>DAY_NAMES[d]).join('/');
+  }
+  return'';
+}
+function resetTaskForm(){document.getElementById('t-name').value='';document.getElementById('t-due').value='';document.getElementById('t-recur').value='none';document.getElementById('t-priority').value='none';document.getElementById('t-tags').value='';document.getElementById('t-estimate').value='';toggleDayPicker('none');document.querySelectorAll('#t-day-picker .day-btn').forEach(b=>b.classList.remove('on'));}
 
 function prioBadgeHtml(p){if(!p||p==='none')return'';return`<span class="badge badge-prio-${p}">${PRIO_LABEL[p]}</span>`;}
 
@@ -1534,7 +1574,8 @@ function renderTasks(){
             <div class="task-name details-trigger ${t.done?'done-name':''}" onclick="wExpand('${esc(t.id)}')" style="font-weight:600;font-size:.92rem;color:var(--text-main);">${esc(t.name)}</div>
             <div class="task-meta" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px;">
               ${cat?`<span class="badge badge-cat" style="background:${cat.color};font-size:.68rem">${cat.label}</span>`:''}
-              ${t.dueDate?`<span class="task-date">${fmtDate(t.dueDate)}${t.recurring!=='none'?' 🔄':''}${over&&!t.done?' <span class="badge badge-over" style="padding:1px 5px">Overdue</span>':''}</span>`:''}
+              ${t.dueDate?`<span class="task-date">${fmtDate(t.dueDate)}${over&&!t.done?' <span class="badge badge-over" style="padding:1px 5px">Overdue</span>':''}</span>`:''}
+            ${recurLabel(t)?`<span class="task-date">${recurLabel(t)}</span>`:''}
               ${prioBadgeHtml(t.priority)}${estimateHtml(t.estimate)}${tagsHtml(t.tags)}
               ${t.subtasks.length?`<span style="font-size:.73rem;color:var(--text-3)">${t.subtasks.filter(s=>s.done).length}/${t.subtasks.length} subtasks</span>`:''}
             </div>
