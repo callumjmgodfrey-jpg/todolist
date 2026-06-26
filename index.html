@@ -111,81 +111,60 @@
       gap:6px;
     }
 
-    /* CUSTOM DROPDOWN NAV (FLAT & MINIMALIST) */
-    .tab-dropdown {
-      position: relative;
-      display: inline-block;
-      z-index: 110;
-    }
-    .tab-dropdown-trigger {
-      background: transparent;
-      border: none;
-      font-family: inherit;
-      font-size: var(--size-body);
-      font-weight: 600;
-      color: var(--text-main);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      transition: color 0.15s ease;
-      outline: none;
-    }
-    .tab-dropdown-trigger:hover {
-      color: var(--accent);
-    }
-    .tab-dropdown.open .chevron-icon {
-      transform: rotate(180deg);
-    }
-    .tab-dropdown-menu {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 50%;
-      transform: translateX(-50%) translateY(-6px);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 0;
-      min-width: 160px;
-      box-shadow: none;
-      display: none;
+    /* SIDE DRAWER NAV */
+    .nav-drawer {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 240px;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      z-index: 300;
+      transform: translateX(-100%);
+      transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+      display: flex;
       flex-direction: column;
-      padding: 4px 0;
-      z-index: 210;
-      opacity: 0;
-      transition: transform .15s ease, opacity .15s ease;
+      padding-top: env(safe-area-inset-top, 0px);
     }
-    .tab-dropdown.open .tab-dropdown-menu {
-      display: flex;
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
+    .nav-drawer.open { transform: translateX(0); }
+    .nav-drawer-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 299;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
     }
-    .tab-dropdown-menu a.tab-btn {
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: var(--size-body);
-      padding: 10px 16px;
-      font-weight: 500;
-      white-space: nowrap;
-      transition: all 0.15s ease;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      border: none;
-      background: none;
-      border-bottom: 1px solid transparent;
+    .nav-drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .nav-drawer-header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600; font-size: .95rem;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text);
     }
-    .tab-dropdown-menu a.tab-btn:hover {
-      color: var(--accent);
+    .nav-drawer-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 20px;
+      color: var(--text-2);
+      font-size: .9rem; font-weight: 500;
+      cursor: pointer; text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: background .12s, color .12s;
+    }
+    .nav-drawer-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-drawer-item.active {
+      color: var(--accent); font-weight: 700;
+      border-left-color: var(--accent);
       background: var(--surface-2);
     }
-    .tab-dropdown-menu a.tab-btn.active {
-      color: var(--accent);
-      font-weight: 700;
-      background: var(--surface-2);
-      border-left: 3px solid var(--accent);
-      padding-left: 13px;
+    .hamburger-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-main); font-size: 1.2rem;
+      padding: 4px 8px; line-height: 1;
+      display: flex; align-items: center;
+    }
+    .hdr-tab-label {
+      font-size: var(--size-body); font-weight: 600;
+      color: var(--text-main); pointer-events: none;
     }
 
     .hdr-actions{display:flex;gap:8px;flex-shrink:0;align-items:center;}
@@ -1274,25 +1253,21 @@
   </div>
 </div>
 
-<header class="hdr">
-  <div class="logo"><span style="color:var(--accent);font-size:1.1rem;margin-right:4px;vertical-align:middle;">●</span>GoalDo</div>
-  
-  <div class="tab-dropdown" id="tab-dropdown">
-    <button class="tab-dropdown-trigger" onclick="toggleTabDropdown(event)" id="tab-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
-      <span id="active-tab-text">📊 Dashboard</span>
-      <span class="chevron-icon" style="display:inline-block;transition:transform .2s ease;font-size:0.75rem;color:var(--accent);">▼</span>
-    </button>
-    <div class="tab-dropdown-menu" id="tab-dropdown-menu" role="menu">
-      <a href="#" class="tab-btn active" onclick="selectTab('dashboard'); return false;" role="menuitem">📊 Dashboard</a>
-      <a href="#" class="tab-btn" onclick="selectTab('goals'); return false;" role="menuitem">目標 Goals</a>
-      <a href="#" class="tab-btn" onclick="selectTab('tasks'); return false;" role="menuitem">任務 Tasks</a>
-      <a href="#" class="tab-btn" onclick="selectTab('habits'); return false;" role="menuitem">習慣 Habits</a>
-      <a href="#" class="tab-btn" onclick="selectTab('review'); return false;" role="menuitem">省察 Review</a>
-      <a href="#" class="tab-btn" onclick="selectTab('reminders'); return false;" role="menuitem">通知 Reminders</a>
-      <a href="#" class="tab-btn" onclick="selectTab('ai'); return false;" role="menuitem">導師 AI Coach</a>
-    </div>
-  </div>
+<div class="nav-drawer-backdrop" id="nav-backdrop" onclick="closeDrawer()"></div>
+<nav class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer-header"><span style="color:var(--accent);font-size:1.1rem;">●</span> GoalDo</div>
+  <a href="#" class="nav-drawer-item tab-btn active" onclick="selectTab('dashboard');return false;">📊 Dashboard</a>
+  <a href="#" class="nav-drawer-item tab-btn" onclick="selectTab('goals');return false;">目標 &nbsp;Goals</a>
+  <a href="#" class="nav-drawer-item tab-btn" onclick="selectTab('tasks');return false;">任務 &nbsp;Tasks</a>
+  <a href="#" class="nav-drawer-item tab-btn" onclick="selectTab('habits');return false;">習慣 &nbsp;Habits</a>
+  <a href="#" class="nav-drawer-item tab-btn" onclick="selectTab('review');return false;">省察 &nbsp;Review</a>
+  <a href="#" class="nav-drawer-item tab-btn" onclick="selectTab('reminders');return false;">通知 &nbsp;Reminders</a>
+  <a href="#" class="nav-drawer-item tab-btn" onclick="selectTab('ai');return false;">導師 &nbsp;AI Coach</a>
+</nav>
 
+<header class="hdr">
+  <button class="hamburger-btn" onclick="openDrawer()" aria-label="Open menu">☰</button>
+  <span class="hdr-tab-label" id="active-tab-text">📊 Dashboard</span>
   <div class="hdr-actions">
     <button class="icon-btn" title="Search" onclick="openSearch()">🔍</button>
     <button class="icon-btn" title="Toggle theme" onclick="cycleTheme()" id="theme-btn">🌙</button>
@@ -2682,20 +2657,9 @@ function switchTab(tab){
   const idx=['dashboard','goals','tasks','habits','review','reminders','ai'].indexOf(tab);
   const btns=document.querySelectorAll('.tab-btn');if(btns[idx])btns[idx].classList.add('active');
 
-  // Update dropdown trigger label
-  const labelMap = {
-    'dashboard': '📊 Dashboard',
-    'goals': 'Goals',
-    'tasks': 'Tasks',
-    'habits': 'Habits',
-    'review': 'Review',
-    'reminders': 'Reminders',
-    'ai': '✨ AI Coach'
-  };
+  const labelMap = {'dashboard':'📊 Dashboard','goals':'Goals','tasks':'Tasks','habits':'Habits','review':'Review','reminders':'Reminders','ai':'✨ AI Coach'};
   const labelEl = document.getElementById('active-tab-text');
-  if (labelEl && labelMap[tab]) {
-    labelEl.textContent = labelMap[tab];
-  }
+  if(labelEl&&labelMap[tab])labelEl.textContent=labelMap[tab];
 
   if(tab==='review')renderReview();
   if(tab==='ai')updateApiKeyStatus();
@@ -2704,27 +2668,36 @@ function switchTab(tab){
 
 function selectTab(tab){
   switchTab(tab);
-  closeTabDropdown();
+  closeDrawer();
 }
 
-function toggleTabDropdown(event){
-  event.stopPropagation();
-  const el = document.getElementById('tab-dropdown');
-  if(el) el.classList.toggle('open');
+function openDrawer(){
+  document.getElementById('nav-drawer').classList.add('open');
+  document.getElementById('nav-backdrop').classList.add('open');
 }
 
-function closeTabDropdown(){
-  const el = document.getElementById('tab-dropdown');
-  if(el) el.classList.remove('open');
+function closeDrawer(){
+  document.getElementById('nav-drawer').classList.remove('open');
+  document.getElementById('nav-backdrop').classList.remove('open');
 }
 
-// Close dropdown when clicking outside
-window.addEventListener('click', function(e) {
-  const dropdown = document.getElementById('tab-dropdown');
-  if (dropdown && !dropdown.contains(e.target)) {
-    closeTabDropdown();
-  }
-});
+// Swipe-right from left edge to open; swipe-left on drawer to close
+(function(){
+  let t0x=0,t0y=0;
+  document.addEventListener('touchstart',e=>{
+    t0x=e.touches[0].clientX;
+    t0y=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-t0x;
+    const dy=e.changedTouches[0].clientY-t0y;
+    if(Math.abs(dy)>Math.abs(dx))return; // vertical scroll, ignore
+    const drawer=document.getElementById('nav-drawer');
+    const isOpen=drawer.classList.contains('open');
+    if(!isOpen&&dx>50&&t0x<40){openDrawer();}   // swipe right from left edge
+    if(isOpen&&dx<-50){closeDrawer();}            // swipe left to close
+  },{passive:true});
+})();
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
 function saveNotifPrefs(){const time=document.getElementById('notif-time').value;if(!('Notification'in window)){document.getElementById('notif-status').textContent='Notifications not supported.';return;}Notification.requestPermission().then(p=>{if(p==='granted'){localStorage.setItem(NOTIF_KEY,JSON.stringify({time,enabled:true}));document.getElementById('notif-status').textContent=`Reminder set for ${time} daily ✓`;}else document.getElementById('notif-status').textContent='Permission denied.';});}
