@@ -9,6 +9,14 @@
       try{var s=JSON.parse(localStorage.getItem('goal_todo_v4')||'{}');var t=(s.settings||{}).theme||'auto';if(t!=='auto')document.documentElement.setAttribute('data-theme',t);}catch(e){}
     })();
   </script>
+  <!-- Firebase SDKs (loaded lazily after user provides config) -->
+  <script>
+    function loadFirebaseSDKs(cb){
+      if(window.firebase){cb();return;}
+      const scripts=['https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js'];
+      let loaded=0;scripts.forEach(src=>{const s=document.createElement('script');s.src=src;s.onload=()=>{if(++loaded===scripts.length)cb();};document.head.appendChild(s);});
+    }
+  </script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -298,6 +306,17 @@
     /* NOTIF */
     .notif-section{max-width:440px;}
 
+    /* CLOUD SYNC */
+    .sync-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:14px;}
+    .sync-status-row{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:.88rem;}
+    .sync-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .sync-dot.green{background:var(--success);}
+    .sync-dot.grey{background:var(--text-3);}
+    .sync-dot.amber{background:var(--warning);}
+    .sync-steps{background:var(--surface-2);border-radius:var(--radius);padding:14px;font-size:.82rem;line-height:1.9;color:var(--text-2);margin-bottom:12px;}
+    .sync-steps b{color:var(--text);}
+    .sync-steps code{background:var(--border);border-radius:4px;padding:1px 5px;font-size:.78rem;color:var(--accent);}
+
     /* AI CHAT */
     .ai-setup-card{background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;}
     .ai-setup-card p{font-size:.83rem;color:var(--text-2);margin-bottom:12px;}
@@ -528,8 +547,35 @@
       <p id="notif-status" style="font-size:.8rem;color:var(--text-2);margin-top:10px"></p>
     </div>
   </div>
-</section>
-</main>
+  <div id="sync-section">
+  <div class="sync-card">
+    <div class="sec-title" style="margin-bottom:4px">☁️ Cloud Sync</div>
+    <div class="sync-status-row">
+      <div class="sync-dot grey" id="sync-dot"></div>
+      <span id="sync-status-text">Not connected</span>
+      <button class="btn btn-ghost btn-sm" id="sync-signin-btn" style="display:none" onclick="signInWithGoogle()">Sign in with Google</button>
+      <button class="btn btn-ghost btn-sm" id="sync-signout-btn" style="display:none" onclick="signOutCloud()">Sign out</button>
+    </div>
+
+    <div id="sync-setup" style="margin-top:8px">
+      <div class="sync-steps">
+        <b>One-time setup (5 min):</b><br>
+        1. Go to <b>console.firebase.google.com</b> → <b>Add project</b><br>
+        2. Inside your project → <b>Firestore Database</b> → Create → <b>Start in test mode</b><br>
+        3. <b>Authentication</b> → Get started → <b>Google</b> → Enable → Save<br>
+        4. Click the <code>&lt;/&gt;</code> web icon → Register app → copy the config object<br>
+        5. Paste it below and click Connect
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Firebase Config (paste the <code>firebaseConfig = { … }</code> block)</label>
+        <textarea id="fb-config-input" rows="5" placeholder='{\n  "apiKey": "AIza...",\n  "authDomain": "yourapp.firebaseapp.com",\n  "projectId": "yourapp",\n  ...\n}'></textarea>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="connectFirebase()">Connect</button>
+      <p id="fb-config-error" style="color:var(--danger);font-size:.8rem;margin-top:6px"></p>
+    </div>
+  </div>
+  </div><!-- /sync-section -->
+</section><!-- /tab-reminders -->
 
 <!-- AI TAB -->
 <section class="tab-panel" id="tab-ai">
@@ -560,7 +606,8 @@
       <button class="btn btn-primary" onclick="sendChat()">Send</button>
     </div>
   </div>
-</section>
+</section><!-- /tab-ai -->
+</main>
 
 <!-- FAB -->
 <button id="fab" title="Quick add" onclick="openQuickAdd()">+</button>
@@ -677,7 +724,7 @@ function loadState(){
   return{goals:[],tasks:[],habits:[],history:{},pomodoroLog:[],journal:{},settings:{theme:'auto'}};
 }
 
-function persist(){localStorage.setItem(KEY,JSON.stringify(state));}
+function persist(){localStorage.setItem(KEY,JSON.stringify(state));if(typeof saveToCloud==='function')saveToCloud();}
 
 // ─── THEME ───────────────────────────────────────────────────────────────────
 const THEMES=['auto','light','dark'];
@@ -1124,6 +1171,124 @@ function pollNotifications(){if(Notification.permission!=='granted')return;const
 // ─── RENDER ALL ──────────────────────────────────────────────────────────────
 function renderAll(){renderGoals();renderTasks();renderHabits();refreshGoalDrop();const active=document.querySelector('.tab-panel.active');if(active&&active.id==='tab-review')renderReview();}
 
+// ─── CLOUD SYNC ──────────────────────────────────────────────────────────────
+let db=null,currentUser=null,syncTimeout=null;
+
+function connectFirebase(){
+  const raw=document.getElementById('fb-config-input').value.trim();
+  const errEl=document.getElementById('fb-config-error');
+  errEl.textContent='';
+  let config;
+  try{
+    // Accept JSON object or the full Firebase snippet
+    const match=raw.match(/firebaseConfig\s*=\s*(\{[\s\S]+?\})/);
+    config=match?JSON.parse(match[1].replace(/(\w+):/g,'"$1":').replace(/'/g,'"')):JSON.parse(raw);
+    if(!config.apiKey||!config.projectId)throw new Error('Missing apiKey or projectId');
+  }catch(e){
+    // Try eval as last resort
+    try{const fn=new Function('return '+raw.match(/(\{[\s\S]+\})/)?.[1]);config=fn();}
+    catch(e2){errEl.textContent='Could not parse config — paste just the { ... } object.';return;}
+  }
+  localStorage.setItem('gd_fb_config',JSON.stringify(config));
+  document.getElementById('fb-config-input').value='';
+  loadFirebaseSDKs(()=>initFirebase(config));
+}
+
+function initFirebase(config){
+  try{
+    if(!window.firebase){setTimeout(()=>initFirebase(config),200);return;}
+    if(!firebase.apps.length)firebase.initializeApp(config);
+    else firebase.app(); // reuse
+    db=firebase.firestore();
+    firebase.auth().onAuthStateChanged(user=>{
+      currentUser=user;
+      updateSyncUI();
+      if(user)loadFromCloud();
+    });
+    updateSyncUI();
+  }catch(e){document.getElementById('fb-config-error').textContent='Firebase error: '+e.message;}
+}
+
+function signInWithGoogle(){
+  if(!db){alert('Connect Firebase first.');return;}
+  const provider=new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(e=>{
+    document.getElementById('fb-config-error').textContent='Sign-in failed: '+e.message;
+  });
+}
+
+function signOutCloud(){
+  if(firebase&&firebase.auth)firebase.auth().signOut();
+}
+
+async function loadFromCloud(){
+  if(!db||!currentUser)return;
+  try{
+    const doc=await db.collection('users').doc(currentUser.uid).collection('data').doc('main').get();
+    if(doc.exists){
+      const c=doc.data();
+      // Cloud wins for goals/tasks/habits/journal/settings; merge history
+      state.goals=(c.goals||state.goals).map(g=>({...g,milestones:g.milestones||[]}));
+      state.tasks=(c.tasks||state.tasks).map(t=>({...t,priority:t.priority||'none',tags:t.tags||[],estimate:t.estimate||0}));
+      state.habits=c.habits||state.habits;
+      state.settings=c.settings||state.settings;
+      state.journal=c.journal||state.journal;
+      state.history={...(c.history||{}),...state.history};
+      const seen=new Set();
+      state.pomodoroLog=[...(c.pomodoroLog||[]),...state.pomodoroLog].filter(p=>seen.has(p.id)?false:seen.add(p.id));
+      localStorage.setItem(KEY,JSON.stringify(state));
+      applyTheme(state.settings.theme||'auto');
+      renderAll();
+    }
+    // Real-time listener
+    db.collection('users').doc(currentUser.uid).collection('data').doc('main')
+      .onSnapshot(snap=>{
+        if(snap.exists&&!snap.metadata.hasPendingWrites){
+          const c=snap.data();
+          if((c._ts||0)>(state._ts||0)){
+            Object.assign(state,c);
+            localStorage.setItem(KEY,JSON.stringify(state));
+            renderAll();
+          }
+        }
+      });
+    setSyncDot('green','Synced as '+currentUser.email);
+  }catch(e){setSyncDot('amber','Sync error: '+e.message);}
+}
+
+function saveToCloud(){
+  if(!db||!currentUser)return;
+  clearTimeout(syncTimeout);
+  syncTimeout=setTimeout(async()=>{
+    try{
+      const cutoff=new Date();cutoff.setDate(cutoff.getDate()-90);const cutoffStr=cutoff.toISOString().slice(0,10);
+      const pruned={...state,_ts:Date.now(),pomodoroLog:(state.pomodoroLog||[]).slice(0,100),history:Object.fromEntries(Object.entries(state.history||{}).filter(([k])=>k>=cutoffStr))};
+      await db.collection('users').doc(currentUser.uid).collection('data').doc('main').set(pruned);
+      setSyncDot('green','Synced as '+currentUser.email);
+    }catch(e){setSyncDot('amber','Sync error: '+e.message);}
+  },1500);
+}
+
+function setSyncDot(color,text){
+  const dot=document.getElementById('sync-dot');
+  const txt=document.getElementById('sync-status-text');
+  if(dot){dot.className='sync-dot '+color;}
+  if(txt)txt.textContent=text;
+}
+
+function updateSyncUI(){
+  const hasConfig=!!localStorage.getItem('gd_fb_config');
+  const setup=document.getElementById('sync-setup');
+  const signIn=document.getElementById('sync-signin-btn');
+  const signOut=document.getElementById('sync-signout-btn');
+  if(setup)setup.style.display=currentUser?'none':'block';
+  if(signIn)signIn.style.display=(!currentUser&&hasConfig)?'inline-flex':'none';
+  if(signOut)signOut.style.display=currentUser?'inline-flex':'none';
+  if(!currentUser&&!hasConfig)setSyncDot('grey','Not connected — paste your Firebase config below');
+  else if(!currentUser&&hasConfig)setSyncDot('grey','Config saved — sign in to sync');
+  else if(currentUser)setSyncDot('green','Synced as '+currentUser.email);
+}
+
 // ─── AI / CLAUDE ─────────────────────────────────────────────────────────────
 function getApiKey(){return localStorage.getItem('gd_api_key')||'';}
 function saveApiKey(){
@@ -1273,6 +1438,10 @@ document.getElementById('search-overlay').addEventListener('click',e=>{if(e.targ
 document.getElementById('focus-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeFocusMode();});
 
 setInterval(pollNotifications,30000);
+
+// Auto-init Firebase if config already saved
+const _fbCfg=localStorage.getItem('gd_fb_config');
+if(_fbCfg){try{loadFirebaseSDKs(()=>initFirebase(JSON.parse(_fbCfg)));}catch(e){}}
 </script>
 </body>
 </html>
