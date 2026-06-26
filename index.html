@@ -3916,8 +3916,21 @@ function displayDailyZenQuote() {
   }
 }
 
+// ─── MIDNIGHT RESET ───────────────────────────────────────────────────────────
+function scheduleMidnightReset(){
+  const now=new Date();
+  const midnight=new Date(now);
+  midnight.setHours(24,0,0,0);
+  setTimeout(()=>{
+    resetRecurring();
+    snapshotToday();
+    renderAll();
+    scheduleMidnightReset();
+  },midnight-now);
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-state=loadState();resetRecurring();snapshotToday();applyTheme(state.settings.theme||'auto');renderAll();displayDailyZenQuote();
+state=loadState();resetRecurring();snapshotToday();applyTheme(state.settings.theme||'auto');renderAll();displayDailyZenQuote();scheduleMidnightReset();
 
 const savedNotif=JSON.parse(localStorage.getItem(NOTIF_KEY)||'{}');
 if(savedNotif.time)document.getElementById('notif-time').value=savedNotif.time;
