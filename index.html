@@ -987,13 +987,13 @@
     .hm-day-label{font-size:.65rem;color:var(--text-3);text-align:center;padding-bottom:2px;}
 
     /* DASHBOARD TAB */
-    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin-bottom:0;}
     @media(max-width:500px){.dash-grid{grid-template-columns:1fr;}}
-    .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;}
-    .dash-card-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);margin-bottom:12px;}
-    .dash-stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.83rem;}
+    .dash-card{background:none;border:none;border-bottom:1px solid var(--border);border-radius:0;padding:16px 0;}
+    .dash-card-title{font-size:.78rem;font-weight:600;color:var(--text-2);margin-bottom:12px;}
+    .dash-stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:.83rem;}
     .dash-stat-row:last-child{border-bottom:none;}
-    .dash-big{font-size:2rem;font-weight:800;color:var(--accent);}
+    .dash-big{font-size:1.75rem;font-weight:600;color:var(--text);}
     .dash-cat-bar-wrap{margin-bottom:6px;}
     .dash-cat-label{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-2);margin-bottom:2px;}
     .dash-cat-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;}
@@ -1017,8 +1017,8 @@
     /* TODAY'S TASKS DASHBOARD */
     .today-task-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
     .today-task-row:last-child{border-bottom:none;}
-    .today-task-order{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .today-task-order.overdue{background:var(--warning);}
+    .today-task-order{width:20px;font-size:.75rem;font-weight:600;color:var(--text-3);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .today-task-order.overdue{color:var(--warning);}
     .today-task-name{flex:1;font-size:.85rem;font-weight:500;}
     .today-task-name.done-name{text-decoration:line-through;color:var(--text-3);}
     .today-task-meta{display:flex;gap:6px;align-items:center;flex-shrink:0;}
