@@ -811,12 +811,12 @@
   
   <div class="tab-dropdown" id="tab-dropdown">
     <button class="tab-dropdown-trigger" onclick="toggleTabDropdown(event)" id="tab-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
-      <span id="active-tab-text">目標 Goals</span>
+      <span id="active-tab-text">任務 Tasks</span>
       <span class="chevron-icon" style="display:inline-block;transition:transform .2s ease;font-size:0.75rem;color:var(--accent);">▼</span>
     </button>
     <div class="tab-dropdown-menu" id="tab-dropdown-menu" role="menu">
-      <a href="#" class="tab-btn active" onclick="selectTab('goals'); return false;" role="menuitem">目標 Goals</a>
-      <a href="#" class="tab-btn" onclick="selectTab('tasks'); return false;" role="menuitem">任務 Tasks</a>
+      <a href="#" class="tab-btn" onclick="selectTab('goals'); return false;" role="menuitem">目標 Goals</a>
+      <a href="#" class="tab-btn active" onclick="selectTab('tasks'); return false;" role="menuitem">任務 Tasks</a>
       <a href="#" class="tab-btn" onclick="selectTab('habits'); return false;" role="menuitem">習慣 Habits</a>
       <a href="#" class="tab-btn" onclick="selectTab('review'); return false;" role="menuitem">省察 Review</a>
       <a href="#" class="tab-btn" onclick="selectTab('reminders'); return false;" role="menuitem">通知 Reminders</a>
@@ -843,7 +843,7 @@
 
 <!-- GOALS TAB -->
 <main class="main">
-<section class="tab-panel active" id="tab-goals">
+<section class="tab-panel" id="tab-goals">
   <div class="form-card" id="goal-form-card">
     <div class="sec-hdr"><div class="sec-title">新規目標 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">New Goal</span></div><button class="link-btn" onclick="openTemplates()">Use template →</button></div>
     <div class="form-row">
@@ -867,7 +867,7 @@
 </section>
 
 <!-- TASKS TAB -->
-<section class="tab-panel" id="tab-tasks">
+<section class="tab-panel active" id="tab-tasks">
   <div class="daily-progress-card" id="daily-progress-card">
     <div class="daily-progress-info">
       <span class="daily-progress-title">🌅 Daily Progress</span>
