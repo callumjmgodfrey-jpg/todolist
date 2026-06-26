@@ -752,13 +752,13 @@
       .hdr{padding:0 16px;}
     }
 
-    /* DAILY PROGRESS CARD */
+    /* DAILY PROGRESS CARD (Traditional Calligraphy Slip Accent) */
     .daily-progress-card{
       background:none !important;
       border:none !important;
-      border-bottom:1px solid var(--border) !important;
+      border-left:2px solid var(--accent) !important;
       border-radius:0 !important;
-      padding:var(--space-md) 0 !important;
+      padding:var(--space-md) 0 var(--space-md) var(--space-lg) !important;
       margin-bottom:var(--space-lg) !important;
       box-shadow:none !important;
     }
@@ -782,8 +782,8 @@
 </head>
 <body>
 
-<div id="lock-screen">
-  <div class="lock-logo">🎯 GoalDo</div>
+<<div id="lock-screen">
+  <div class="lock-logo"><span style="color:var(--accent);font-size:2rem;margin-right:6px;vertical-align:middle;">●</span>GoalDo</div>
   <div class="lock-sub">Enter your PIN to continue</div>
   <div class="pin-dots" id="pin-dots">
     <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
@@ -807,20 +807,20 @@
 </div>
 
 <header class="hdr">
-  <div class="logo">🎯 GoalDo</div>
+  <div class="logo"><span style="color:var(--accent);font-size:1.1rem;margin-right:4px;vertical-align:middle;">●</span>GoalDo</div>
   
   <div class="tab-dropdown" id="tab-dropdown">
     <button class="tab-dropdown-trigger" onclick="toggleTabDropdown(event)" id="tab-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
-      <span id="active-tab-text">Goals</span>
+      <span id="active-tab-text">目標 Goals</span>
       <span class="chevron-icon" style="display:inline-block;transition:transform .2s ease;font-size:0.75rem;color:var(--accent);">▼</span>
     </button>
     <div class="tab-dropdown-menu" id="tab-dropdown-menu" role="menu">
-      <a href="#" class="tab-btn active" onclick="selectTab('goals'); return false;" role="menuitem">Goals</a>
-      <a href="#" class="tab-btn" onclick="selectTab('tasks'); return false;" role="menuitem">Tasks</a>
-      <a href="#" class="tab-btn" onclick="selectTab('habits'); return false;" role="menuitem">Habits</a>
-      <a href="#" class="tab-btn" onclick="selectTab('review'); return false;" role="menuitem">Review</a>
-      <a href="#" class="tab-btn" onclick="selectTab('reminders'); return false;" role="menuitem">Reminders</a>
-      <a href="#" class="tab-btn" onclick="selectTab('ai'); return false;" role="menuitem">✨ AI Coach</a>
+      <a href="#" class="tab-btn active" onclick="selectTab('goals'); return false;" role="menuitem">目標 Goals</a>
+      <a href="#" class="tab-btn" onclick="selectTab('tasks'); return false;" role="menuitem">任務 Tasks</a>
+      <a href="#" class="tab-btn" onclick="selectTab('habits'); return false;" role="menuitem">習慣 Habits</a>
+      <a href="#" class="tab-btn" onclick="selectTab('review'); return false;" role="menuitem">省察 Review</a>
+      <a href="#" class="tab-btn" onclick="selectTab('reminders'); return false;" role="menuitem">通知 Reminders</a>
+      <a href="#" class="tab-btn" onclick="selectTab('ai'); return false;" role="menuitem">導師 AI Coach</a>
     </div>
   </div>
 
@@ -845,7 +845,7 @@
 <main class="main">
 <section class="tab-panel active" id="tab-goals">
   <div class="form-card" id="goal-form-card">
-    <div class="sec-hdr"><div class="sec-title">New Goal</div><button class="link-btn" onclick="openTemplates()">Use template →</button></div>
+    <div class="sec-hdr"><div class="sec-title">新規目標 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">New Goal</span></div><button class="link-btn" onclick="openTemplates()">Use template →</button></div>
     <div class="form-row">
       <div class="form-group" style="flex:2"><label>Goal Title</label><input type="text" id="g-title" placeholder="e.g. Run a 5K" /></div>
       <div class="form-group"><label>Type</label><select id="g-type"><option value="short">Short-term</option><option value="long">Long-term</option></select></div>
@@ -879,7 +879,7 @@
   </div>
 
   <div class="form-card">
-    <div class="sec-title" style="margin-bottom:12px">New Task</div>
+    <div class="sec-title" style="margin-bottom:12px">新規任務 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">New Task</span></div>
     <div class="form-row">
       <div class="form-group" style="flex:2"><label>Task Name</label><input type="text" id="t-name" placeholder="What needs doing?" /></div>
       <div class="form-group"><label>Priority</label><select id="t-priority"><option value="none">— None</option><option value="high">🔴 High</option><option value="medium">🟡 Medium</option><option value="low">🔵 Low</option></select></div>
@@ -914,7 +914,7 @@
 <!-- HABITS TAB -->
 <section class="tab-panel" id="tab-habits">
   <div class="form-card">
-    <div class="sec-title" style="margin-bottom:12px">New Habit</div>
+    <div class="sec-title" style="margin-bottom:12px">新規習慣 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">New Habit</span></div>
     <div class="form-row">
       <div class="form-group" style="flex:2"><label>Habit Name</label><input type="text" id="h-name" placeholder="e.g. Morning meditation" /></div>
       <div class="form-group"><label>Emoji</label><input type="text" id="h-emoji" placeholder="🌿" maxlength="2" style="max-width:70px" /></div>
@@ -930,28 +930,28 @@
   <div class="stats-row" id="review-stats"></div>
   <div class="review-grid">
     <div class="review-card" style="grid-column:span 2">
-      <h4>Last 7 days</h4>
+      <h4>七日間の記録 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Last 7 days</span></h4>
       <div class="history-grid" id="history-grid"></div>
     </div>
     <div class="review-card">
-      <h4>Weekly score</h4>
+      <h4>自己省察 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Weekly score</span></h4>
       <div id="score-section"></div>
     </div>
     <div class="review-card">
-      <h4>Insights</h4>
+      <h4>洞察 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Insights</span></h4>
       <div class="insights-grid" id="insights-section"></div>
     </div>
     <div class="review-card">
-      <h4>Goal progress</h4>
+      <h4>目標進捗 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Goal progress</span></h4>
       <div id="review-goals"></div>
     </div>
     <div class="review-card">
-      <h4>🍅 Pomodoro sessions</h4>
+      <h4>集中記録 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Pomodoro sessions</span></h4>
       <div class="pomo-log" id="pomo-log"></div>
     </div>
   </div>
   <div class="review-card" style="margin-bottom:14px">
-    <h4>Daily journal</h4>
+    <h4>日誌 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Daily journal</span></h4>
     <textarea id="journal-ta" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:.88rem;font-family:inherit;color:var(--text);resize:vertical;min-height:70px;margin-bottom:10px;" placeholder="How did today go? What did you learn?"></textarea>
     <button class="btn btn-primary btn-sm" onclick="saveJournal()">Save note</button>
     <div id="journal-history" style="margin-top:12px;"></div>
@@ -967,7 +967,7 @@
 <section class="tab-panel" id="tab-reminders">
   <div class="notif-section">
     <div class="card">
-      <div class="sec-title" style="margin-bottom:10px">Daily Reminder</div>
+      <div class="sec-title" style="margin-bottom:10px">日常通知 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">Daily Reminder</span></div>
       <p style="font-size:.85rem;color:var(--text-2);margin-bottom:14px">Get a browser notification each morning to review your tasks.</p>
       <div class="form-row" style="margin-bottom:0">
         <div class="form-group"><label>Reminder Time</label><input type="time" id="notif-time" value="08:00" /></div>
@@ -978,7 +978,7 @@
   </div>
   <div id="sync-section">
   <div class="sync-card">
-    <div class="sec-title" style="margin-bottom:4px">☁️ Cloud Sync</div>
+    <div class="sec-title" style="margin-bottom:4px">同期設定 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">Cloud Sync</span></div>
     <div class="sync-status-row">
       <div class="sync-dot grey" id="sync-dot"></div>
       <span id="sync-status-text">Not connected</span>
@@ -1009,7 +1009,7 @@
 <!-- AI TAB -->
 <section class="tab-panel" id="tab-ai">
   <div class="ai-setup-card" id="ai-setup-card">
-    <div class="sec-title" style="margin-bottom:8px">✨ Claude AI Coach</div>
+    <div class="sec-title" style="margin-bottom:8px">導師 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">Claude AI Coach</span></div>
     <p>Chat with Claude about your goals, get task suggestions, and plan your days. Your API key is stored only in your browser.</p>
     <div style="display:flex;gap:8px;align-items:flex-end">
       <div class="form-group" style="flex:1"><label>Anthropic API Key</label><input type="password" id="ai-key-input" placeholder="sk-ant-api03-…" /></div>
