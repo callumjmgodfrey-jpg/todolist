@@ -1772,7 +1772,7 @@ const NOTIF_LAST='goal_todo_last_notif';
 let state;
 
 function uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36);}
-function todayStr(){return new Date().toISOString().slice(0,10);}
+function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtDate(s){if(!s)return'';const d=new Date(s+'T12:00:00');return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});}
 
@@ -1830,7 +1830,7 @@ function resetRecurring(){
 
 // ─── HISTORY ─────────────────────────────────────────────────────────────────
 function snapshotToday(){const _today=todayStr();const tasks=state.tasks.filter(t=>isActiveToday(t)||((!t.recurring||t.recurring==='none')&&(!t.dueDate||t.dueDate<=_today)));const done=tasks.filter(t=>t.done).length;const existing=state.history[todayStr()]||{};state.history[todayStr()]={done,total:tasks.length,pomodoros:existing.pomodoros||0};persist();}
-function calcStreak(){let streak=0,best=0,cur=0,streakLocked=false;const d=new Date();for(let i=0;i<365;i++){const k=d.toISOString().slice(0,10);const h=state.history[k];if(h&&h.total>0&&h.done===h.total){cur++;if(cur>best)best=cur;if(!streakLocked)streak=cur;}else{streakLocked=true;cur=0;}d.setDate(d.getDate()-1);}return{streak,best};}
+function calcStreak(){let streak=0,best=0,cur=0,streakLocked=false;const d=new Date();for(let i=0;i<365;i++){const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const h=state.history[k];if(h&&h.total>0&&h.done===h.total){cur++;if(cur>best)best=cur;if(!streakLocked)streak=cur;}else{streakLocked=true;cur=0;}d.setDate(d.getDate()-1);}return{streak,best};}
 
 // ─── CONFETTI ─────────────────────────────────────────────────────────────────
 function launchConfetti(duration=3500){
@@ -2894,7 +2894,7 @@ function renderDashboard(){
     : '<p style="font-size:.82rem;color:var(--text-3)">No tasks scheduled for today.</p>';
 
   // Upcoming 7 days
-  const days7=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);days7.push(d.toISOString().slice(0,10));}
+  const days7=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);days7.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);}
   const upcoming=allTasks.filter(t=>!t.done&&t.dueDate&&days7.includes(t.dueDate)).sort((a,b)=>a.dueDate>b.dueDate?1:-1);
   document.getElementById('dash-upcoming').innerHTML=upcoming.length?upcoming.slice(0,10).map(t=>{
     const g=state.goals.find(x=>x.id===t.goalId);
