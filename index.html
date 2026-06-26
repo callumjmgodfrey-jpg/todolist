@@ -2884,8 +2884,8 @@ function renderDashboard(){
 
   // Auto-apply suggested order to the main task list
   if(suggested.length>1){
-    const suggestedIds=suggested.map(t=>t.id);
-    const rest=state.tasks.filter(t=>t.dueDate!==todayS);
+    const suggestedIds=new Set(suggested.map(t=>t.id));
+    const rest=state.tasks.filter(t=>!suggestedIds.has(t.id));
     state.tasks=[...suggested,...rest];
     persist();
   }
