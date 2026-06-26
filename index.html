@@ -732,6 +732,14 @@
     .goal-notes-ta{width:100%;background:none;border:none;border-bottom:1px solid var(--border);font-size:.85rem;font-family:inherit;color:var(--text);resize:none;outline:none;padding:4px 0;min-height:48px;line-height:1.5;}
     .goal-notes-ta:focus{border-bottom-color:var(--accent);}
 
+    /* ONGOING GOAL SCORE */
+    .ongoing-score-wrap{display:flex;align-items:center;gap:14px;margin:10px 0 6px;}
+    .ongoing-score-num{font-size:2.4rem;font-weight:900;color:var(--accent);line-height:1;}
+    .ongoing-score-label{font-size:.78rem;color:var(--text-2);line-height:1.4;}
+    .ongoing-score-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px;}
+    .ongoing-score-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s ease;}
+    .ongoing-badge{font-size:.7rem;background:var(--accent-light);color:var(--accent);border-radius:4px;padding:1px 6px;font-weight:700;}
+
     /* OVERDUE RESCHEDULE */
     .reschedule-btn{background:none;border:none;color:var(--warning);font-size:.75rem;font-weight:700;cursor:pointer;padding:0;white-space:nowrap;}
     .reschedule-btn:hover{text-decoration:underline;}
@@ -1075,6 +1083,19 @@
     <div class="form-row">
       <div class="form-group"><label>Category</label><select id="g-cat"><option value="health">🏃 Health</option><option value="career">💼 Career</option><option value="finance">💰 Finance</option><option value="personal">🏠 Personal</option><option value="learning">📚 Learning</option><option value="other">⭐ Other</option></select></div>
       <div class="form-group"><label>Deadline</label><input type="date" id="g-deadline" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Goal mode</label>
+        <select id="g-mode" onchange="toggleOngoingFields(this.value)">
+          <option value="oneoff">One-off — finish when tasks done</option>
+          <option value="ongoing">Ongoing — score goes up each completion</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" id="g-ongoing-fields" style="display:none">
+      <div class="form-group"><label>Unit label <span style="font-weight:400;color:var(--text-2)">(e.g. "workouts", "pages")</span></label><input type="text" id="g-unit" placeholder="completions" /></div>
+      <div class="form-group"><label>Target <span style="font-weight:400;color:var(--text-2)">(optional)</span></label><input type="number" id="g-target" placeholder="e.g. 50" min="1" /></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Description (optional)</label><textarea id="g-desc" placeholder="Why this goal matters…"></textarea></div>
@@ -1461,7 +1482,7 @@ function loadState(){
       s.settings=s.settings||{theme:'auto'};
       s.history=s.history||{};
       s.journal=s.journal||{};
-      s.goals=(s.goals||[]).map(g=>({...g,milestones:g.milestones||[],notes:g.notes||''}));
+      s.goals=(s.goals||[]).map(g=>({...g,milestones:g.milestones||[],notes:g.notes||'',mode:g.mode||'oneoff',unit:g.unit||'completions',target:g.target||0,score:g.score||0}));
       s.tasks=(s.tasks||[]).map(t=>({...t,priority:t.priority||'none',tags:t.tags||[],estimate:t.estimate||0,recurringDays:t.recurringDays||[],timeLog:t.timeLog||[],blockedBy:t.blockedBy||[]}));
       return s;
     }
@@ -1529,11 +1550,12 @@ let pendingTplTasks=null;
 function addGoal(){
   const title=document.getElementById('g-title').value.trim();
   if(!title){alert('Enter a goal title.');return null;}
-  const g={id:uid(),title,type:document.getElementById('g-type').value,category:document.getElementById('g-cat').value,desc:document.getElementById('g-desc').value.trim(),deadline:document.getElementById('g-deadline').value,archived:false,createdAt:todayStr(),milestones:[]};
+  const mode=document.getElementById('g-mode').value;
+  const g={id:uid(),title,type:document.getElementById('g-type').value,category:document.getElementById('g-cat').value,desc:document.getElementById('g-desc').value.trim(),deadline:document.getElementById('g-deadline').value,archived:false,createdAt:todayStr(),milestones:[],notes:'',mode,unit:(document.getElementById('g-unit').value.trim()||'completions'),target:parseInt(document.getElementById('g-target').value||'0')||0,score:0};
   state.goals.push(g);
   if(pendingTplTasks){pendingTplTasks.forEach(name=>state.tasks.push({id:uid(),name,goalId:g.id,dueDate:'',recurring:'none',priority:'none',tags:[],estimate:0,notes:'',subtasks:[],done:false,lastReset:'',createdAt:todayStr()}));pendingTplTasks=null;}
   persist();
-  document.getElementById('g-title').value='';document.getElementById('g-desc').value='';document.getElementById('g-deadline').value='';
+  document.getElementById('g-title').value='';document.getElementById('g-desc').value='';document.getElementById('g-deadline').value='';document.getElementById('g-mode').value='oneoff';document.getElementById('g-unit').value='';document.getElementById('g-target').value='';toggleOngoingFields('oneoff');
   renderAll();return g;
 }
 
@@ -1604,6 +1626,17 @@ function renderGoals(){
           </div>
         </div>
         ${g.desc?`<div class="goal-desc" style="font-size:.85rem;color:var(--text-muted);margin-bottom:10px;line-height:1.4;margin-top:4px;">${esc(g.desc)}</div>`:''}
+        ${g.mode==='ongoing'?`
+        <div class="ongoing-score-wrap">
+          <div class="ongoing-score-num">${g.score||0}</div>
+          <div class="ongoing-score-label">
+            <span style="font-weight:700">${esc(g.unit||'completions')}</span><br>
+            ${g.target?`<span style="color:var(--text-3)">target: ${g.target}</span>`:''}
+            ${g.score&&g.score%10===0&&!g.target?`<span class="ongoing-badge">🔥 ${g.score} milestone!</span>`:''}
+          </div>
+        </div>
+        ${g.target?`<div class="ongoing-score-bar"><div class="ongoing-score-fill" style="width:${Math.min(100,Math.round((g.score||0)/g.target*100))}%"></div></div><div style="font-size:.72rem;color:var(--text-2);margin-top:3px">${Math.min(100,Math.round((g.score||0)/g.target*100))}% to target</div>`:''}
+        `:`
         <div class="goal-prog-label" style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-muted);margin-bottom:4px;font-weight:500;margin-top:8px;">
           <span>${prog.done}/${prog.total} tasks</span>
           <span>${prog.pct}%</span>
@@ -1611,6 +1644,7 @@ function renderGoals(){
         <div class="progress-bar" style="width:100%;height:2px;background-color:var(--border);position:relative;margin:var(--space-sm) 0;">
           <div class="progress-fill ${prog.pct===100?'success':''}" style="width:${prog.pct}%;height:100%;transition:width 0.3s ease;"></div>
         </div>
+        `}
         ${ms.length?`<div style="font-size:.74rem;color:var(--text-2);margin-top:3px">Milestones: ${msDone}/${ms.length}</div>`:''}
         ${msSection}
         <div class="goal-notes-section">
@@ -1738,13 +1772,23 @@ window.wToggleTask=id=>{
   t.done=!t.done;persist();snapshotToday();
   if(t.done){
     playZenChime();
-    // Check if goal just hit 100%
-    if(t.goalId){const p=goalProgress(t.goalId);if(p.pct===100)launchConfetti();}
-    // Check if all today's tasks done
+    if(t.goalId){
+      const g=state.goals.find(x=>x.id===t.goalId);
+      if(g&&g.mode==='ongoing'){
+        g.score=(g.score||0)+1;persist();
+        // Confetti at target milestones
+        if(g.target&&g.score===g.target)launchConfetti();
+        else if(g.score%10===0)launchConfetti();
+      } else {
+        const p=goalProgress(t.goalId);if(p.pct===100)launchConfetti();
+      }
+    }
     const today=todayStr();const todayTasks=state.tasks.filter(x=>x.dueDate===today);if(todayTasks.length&&todayTasks.every(x=>x.done))launchConfetti();
   }
-  renderTasks();renderReview();
+  renderTasks();renderReview();renderGoals();
 };
+
+function toggleOngoingFields(v){const el=document.getElementById('g-ongoing-fields');if(el)el.style.display=v==='ongoing'?'flex':'none';}
 window.wDeleteTask=id=>{if(!confirm('Delete this task?'))return;state.tasks=state.tasks.filter(x=>x.id!==id);persist();renderAll();};
 window.wExpand=id=>{if(expanded.has(id))expanded.delete(id);else expanded.add(id);renderTasks();};
 window.wToggleSub=(tid,sid)=>{const t=state.tasks.find(x=>x.id===tid);if(!t)return;const s=t.subtasks.find(x=>x.id===sid);if(s){s.done=!s.done;persist();renderTasks();}};
