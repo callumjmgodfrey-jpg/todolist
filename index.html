@@ -1993,14 +1993,14 @@ function connectFirebase(){
   errEl.textContent='';
   let config;
   try{
-    // Accept JSON object or the full Firebase snippet
-    const match=raw.match(/firebaseConfig\s*=\s*(\{[\s\S]+?\})/);
-    config=match?JSON.parse(match[1].replace(/(\w+):/g,'"$1":').replace(/'/g,'"')):JSON.parse(raw);
-    if(!config.apiKey||!config.projectId)throw new Error('Missing apiKey or projectId');
+    // Extract the { ... } block whether they paste the full snippet or just the object
+    const objStr=(raw.match(/\{[\s\S]*\}/))||[null];
+    if(!objStr[0])throw new Error('No object found');
+    // Use Function constructor to safely evaluate the JS object literal (not strict JSON)
+    config=(new Function('return ('+objStr[0]+')'))();
+    if(!config||!config.apiKey||!config.projectId)throw new Error('Missing apiKey or projectId — make sure you copied the full config block');
   }catch(e){
-    // Try eval as last resort
-    try{const fn=new Function('return '+raw.match(/(\{[\s\S]+\})/)?.[1]);config=fn();}
-    catch(e2){errEl.textContent='Could not parse config — paste just the { ... } object.';return;}
+    errEl.textContent='Error: '+e.message;return;
   }
   localStorage.setItem('gd_fb_config',JSON.stringify(config));
   document.getElementById('fb-config-input').value='';
