@@ -694,6 +694,54 @@
     /* NOTIF */
     .notif-section{max-width:440px;}
 
+    /* ONBOARDING */
+    #ob-overlay{position:fixed;inset:0;background:var(--bg);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+    .ob-panel{width:min(94vw,460px);text-align:center;}
+    .ob-icon{font-size:3rem;margin-bottom:16px;}
+    .ob-title{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;}
+    .ob-sub{font-size:.9rem;color:var(--text-2);margin-bottom:28px;line-height:1.5;}
+    .ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:28px;}
+    .ob-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+    .ob-dot.active{background:var(--accent);}
+    .ob-form{text-align:left;margin-bottom:20px;}
+    .ob-skip{background:none;border:none;color:var(--text-3);font-size:.82rem;cursor:pointer;margin-top:12px;}
+    .ob-skip:hover{color:var(--text-2);}
+
+    /* BULK BAR */
+    #bulk-bar{position:fixed;bottom:0;left:0;right:0;background:var(--text);color:var(--bg);padding:12px 20px;display:none;align-items:center;gap:12px;z-index:250;font-size:.88rem;}
+    #bulk-bar.visible{display:flex;}
+    .bulk-count{flex:1;font-weight:700;}
+    .bulk-btn{background:rgba(255,255,255,.15);border:none;color:inherit;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.82rem;font-weight:600;}
+    .bulk-btn:hover{background:rgba(255,255,255,.25);}
+    .bulk-cancel{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:.82rem;}
+    .task-select-cb{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+
+    /* INLINE EDIT */
+    .task-name-input{background:none;border:none;border-bottom:2px solid var(--accent);font-size:.92rem;font-weight:600;color:var(--text);font-family:inherit;outline:none;width:100%;padding:0;}
+    .bulk-selected{background:color-mix(in srgb,var(--accent) 8%,transparent) !important;}
+
+    /* SORT */
+    .sort-select{background:none;border:none;color:var(--text-2);font-size:.8rem;cursor:pointer;font-family:inherit;padding:0;}
+    .sort-select:focus{outline:none;}
+
+    /* GOAL RING */
+    .goal-ring-wrap{flex-shrink:0;}
+
+    /* GOAL NOTES */
+    .goal-notes-section{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
+    .goal-notes-ta{width:100%;background:none;border:none;border-bottom:1px solid var(--border);font-size:.85rem;font-family:inherit;color:var(--text);resize:none;outline:none;padding:4px 0;min-height:48px;line-height:1.5;}
+    .goal-notes-ta:focus{border-bottom-color:var(--accent);}
+
+    /* OVERDUE RESCHEDULE */
+    .reschedule-btn{background:none;border:none;color:var(--warning);font-size:.75rem;font-weight:700;cursor:pointer;padding:0;white-space:nowrap;}
+    .reschedule-btn:hover{text-decoration:underline;}
+
+    /* HABIT REVIEW */
+    .habit-review-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);}
+    .habit-review-row:last-child{border-bottom:none;}
+    .habit-review-name{flex:1;font-size:.85rem;font-weight:500;}
+    .habit-review-streak{font-size:.82rem;color:var(--accent);font-weight:700;}
+
     /* CLOUD SYNC */
     .sync-card{background:none;border:none;border-bottom:1px solid var(--border);border-radius:0;padding:20px 0;margin-bottom:16px;box-shadow:none;}
     .sync-status-row{display:flex;align-items:center;gap:12px;padding:12px 0;font-size:.9rem;}
@@ -1096,6 +1144,10 @@
       <h4>集中記録 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Pomodoro sessions</span></h4>
       <div class="pomo-log" id="pomo-log"></div>
     </div>
+    <div class="review-card">
+      <h4>習慣連続 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Habit streaks</span></h4>
+      <div id="habit-streaks-section"></div>
+    </div>
   </div>
   <div class="review-card" style="margin-bottom:14px">
     <h4>日誌 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Daily journal</span></h4>
@@ -1321,7 +1373,7 @@ function loadState(){
       s.settings=s.settings||{theme:'auto'};
       s.history=s.history||{};
       s.journal=s.journal||{};
-      s.goals=(s.goals||[]).map(g=>({...g,milestones:g.milestones||[]}));
+      s.goals=(s.goals||[]).map(g=>({...g,milestones:g.milestones||[],notes:g.notes||''}));
       s.tasks=(s.tasks||[]).map(t=>({...t,priority:t.priority||'none',tags:t.tags||[],estimate:t.estimate||0,recurringDays:t.recurringDays||[]}));
       return s;
     }
@@ -1424,6 +1476,18 @@ function renderGoals(){
       const msOpen=expandedGoals.has(g.id);
       const ms=g.milestones||[];
       const msDone=ms.filter(m=>m.done).length;
+      // Countdown ring
+      let ringHtml='';
+      if(g.deadline){
+        const daysLeft=Math.ceil((new Date(g.deadline)-new Date(todayStr()))/(86400000));
+        const r=18,circ=Math.round(2*Math.PI*r);
+        const pct=Math.max(0,Math.min(100,prog.pct));
+        const dash=Math.round(pct/100*circ);
+        const ringColor=daysLeft<0?'var(--warning)':daysLeft<=3?'#f59e0b':'var(--accent)';
+        ringHtml=`<div class="goal-ring-wrap" title="${daysLeft<0?'Overdue by '+Math.abs(daysLeft)+'d':daysLeft+' days left'}">
+          <svg width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="${r}" fill="none" stroke="var(--border)" stroke-width="3"/><circle cx="21" cy="21" r="${r}" fill="none" stroke="${ringColor}" stroke-width="3" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${Math.round(circ/4)}" stroke-linecap="round" transform="rotate(-90 21 21)"/><text x="21" y="25" text-anchor="middle" font-size="9" font-weight="700" fill="${ringColor}">${daysLeft<0?'!':daysLeft>99?'∞':daysLeft}</text></svg>
+        </div>`;
+      }
       const msSection=msOpen?`<div class="milestones-section inline-details" style="display:block;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;"><div style="font-size:.78rem;font-weight:700;color:var(--text-2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Milestones</div>${ms.map(m=>`<div class="milestone-row"><input type="checkbox" class="enso-check" ${m.done?'checked':''} onchange="wToggleMilestone('${esc(g.id)}','${esc(m.id)}')" /><span class="milestone-label ${m.done?'done':''}">${esc(m.title)}</span><button class="ms-del" onclick="wDeleteMilestone('${esc(g.id)}','${esc(m.id)}')">✕</button></div>`).join('')}<div class="ms-add-row"><input id="ms-input-${esc(g.id)}" placeholder="Add milestone…" style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--text);font-size:.85rem;" onkeydown="if(event.key==='Enter')wAddMilestone('${esc(g.id)}')" /><button class="btn btn-ghost btn-sm" onclick="wAddMilestone('${esc(g.id)}')">+ Add</button></div></div>`:'';
       return `<div class="goal-card list-item ${msOpen?'is-expanded':''}" style="position:relative;">
         ${prog.pct===100?`
@@ -1443,6 +1507,7 @@ function renderGoals(){
               ${deadlineBadge(g.deadline)}
             </div>
           </div>
+          ${ringHtml}
           <div class="goal-actions hover-actions" style="display:flex;gap:10px;align-items:center;margin-top:0;">
             <button onclick="wToggleGoalMilestones('${esc(g.id)}')">${msOpen?'▲':'▼'} Milestones${ms.length?` (${ms.length})`:'+'}</button>
             <button onclick="wAiSuggestTasks('${esc(g.id)}')">✨ Suggest tasks</button>
@@ -1460,6 +1525,10 @@ function renderGoals(){
         </div>
         ${ms.length?`<div style="font-size:.74rem;color:var(--text-2);margin-top:3px">Milestones: ${msDone}/${ms.length}</div>`:''}
         ${msSection}
+        <div class="goal-notes-section">
+          <div style="font-size:.72rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Notes</div>
+          <textarea id="gnotes-${esc(g.id)}" class="goal-notes-ta" rows="2" placeholder="Scratchpad for this goal…" onblur="wSaveGoalNotes('${esc(g.id)}')">${esc(g.notes||'')}</textarea>
+        </div>
       </div>`;
     }).join('');
   }
@@ -1473,11 +1542,78 @@ function renderGoals(){
 function toggleArchivedView(){showArchived=!showArchived;const el=document.getElementById('archived-list');const btn=document.querySelector('.archived-toggle');if(el)el.style.display=showArchived?'block':'none';if(btn)btn.textContent=(showArchived?'▼':'▶')+' Show archived goals';}
 
 // ─── TASKS ───────────────────────────────────────────────────────────────────
-let taskFilter='all',sortPriority=false,taskView='list',weekOffset=0,dragMode='reorder',dragSrc=null;
+let taskFilter='all',sortPriority=false,sortMode='default',taskView='list',weekOffset=0,dragMode='reorder',dragSrc=null;
+let bulkSel=new Set();
 
 function setTaskFilter(f,btn){taskFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderTasks();}
 function togglePrioSort(){sortPriority=!sortPriority;document.getElementById('prio-sort-btn').classList.toggle('active',sortPriority);renderTasks();}
 function setTaskView(v){taskView=v;document.getElementById('view-list-btn').classList.toggle('active',v==='list');document.getElementById('view-week-btn').classList.toggle('active',v==='week');renderTasks();}
+function setSortMode(v){sortMode=v;renderTasks();}
+
+// ─── INLINE EDIT ──────────────────────────────────────────────────────────────
+window.wStartInlineEdit=id=>{
+  const el=document.getElementById('task-name-'+id);if(!el)return;
+  const inp=document.createElement('input');inp.className='task-name-input';inp.value=el.textContent;inp.id='task-edit-'+id;
+  el.replaceWith(inp);inp.focus();inp.select();
+  inp.onblur=()=>wSaveInlineEdit(id);
+  inp.onkeydown=e=>{if(e.key==='Enter')wSaveInlineEdit(id);if(e.key==='Escape')renderTasks();};
+};
+window.wSaveInlineEdit=id=>{
+  const inp=document.getElementById('task-edit-'+id);if(!inp)return;
+  const name=inp.value.trim();if(!name){renderTasks();return;}
+  const t=state.tasks.find(x=>x.id===id);if(t){t.name=name;persist();}renderTasks();
+};
+
+// ─── BULK ACTIONS ─────────────────────────────────────────────────────────────
+function toggleBulk(id){if(bulkSel.has(id))bulkSel.delete(id);else bulkSel.add(id);updateBulkBar();}
+function updateBulkBar(){
+  const bar=document.getElementById('bulk-bar');if(!bar)return;
+  if(bulkSel.size===0){bar.classList.remove('visible');return;}
+  bar.classList.add('visible');
+  document.getElementById('bulk-count').textContent=bulkSel.size+' selected';
+}
+window.wBulkDone=()=>{bulkSel.forEach(id=>{const t=state.tasks.find(x=>x.id===id);if(t)t.done=true;});persist();snapshotToday();bulkSel=new Set();updateBulkBar();renderTasks();};
+window.wBulkDelete=()=>{if(!confirm('Delete '+bulkSel.size+' tasks?'))return;state.tasks=state.tasks.filter(t=>!bulkSel.has(t.id));persist();bulkSel=new Set();updateBulkBar();renderAll();};
+window.wBulkToday=()=>{const today=todayStr();bulkSel.forEach(id=>{const t=state.tasks.find(x=>x.id===id);if(t)t.dueDate=today;});persist();bulkSel=new Set();updateBulkBar();renderTasks();};
+window.wBulkCancel=()=>{bulkSel=new Set();updateBulkBar();renderTasks();};
+
+// ─── OVERDUE RESCHEDULE ───────────────────────────────────────────────────────
+window.wRescheduleToday=id=>{const t=state.tasks.find(x=>x.id===id);if(t){t.dueDate=todayStr();persist();renderTasks();}};
+
+// ─── GOAL NOTES ───────────────────────────────────────────────────────────────
+window.wSaveGoalNotes=id=>{const ta=document.getElementById('gnotes-'+id);if(!ta)return;const g=state.goals.find(x=>x.id===id);if(g){g.notes=ta.value;persist();}};
+
+// ─── ONBOARDING ───────────────────────────────────────────────────────────────
+let obStep=0;
+const OB_STEPS=[
+  {icon:'🎯',title:'Welcome to GoalDo!',sub:'GoalDo helps you connect daily tasks to the goals that matter. Let\'s set up your first goal to get started.'},
+  {icon:'✅',title:'Add your first task',sub:'Tasks are the building blocks of your goals. Give your first task a name and link it to your goal.'},
+  {icon:'🌱',title:'Build a daily habit',sub:'Small habits compound over time. Track one daily habit to stay consistent.'},
+];
+function showOnboarding(){
+  if(state.settings.onboarded)return;
+  const isNew=!state.goals.length&&!state.tasks.length&&!state.habits.length;
+  if(!isNew){state.settings.onboarded=true;persist();return;}
+  obStep=0;renderObStep();
+  document.getElementById('ob-overlay').style.display='flex';
+}
+function renderObStep(){
+  const s=OB_STEPS[obStep];if(!s)return;
+  document.getElementById('ob-icon').textContent=s.icon;
+  document.getElementById('ob-title').textContent=s.title;
+  document.getElementById('ob-sub').textContent=s.sub;
+  document.querySelectorAll('.ob-dot').forEach((d,i)=>d.classList.toggle('active',i===obStep));
+  document.getElementById('ob-next-btn').textContent=obStep<OB_STEPS.length-1?'Next →':'Get Started!';
+}
+window.wObNext=()=>{
+  obStep++;
+  if(obStep>=OB_STEPS.length){
+    document.getElementById('ob-overlay').style.display='none';
+    state.settings.onboarded=true;persist();return;
+  }
+  renderObStep();
+};
+window.wObSkip=()=>{document.getElementById('ob-overlay').style.display='none';state.settings.onboarded=true;persist();};
 
 function filterTasks(tasks){
   const today=todayStr();
@@ -1491,8 +1627,10 @@ function filterTasks(tasks){
 }
 
 function sortedTasks(tasks){
-  if(!sortPriority)return tasks;
-  return[...tasks].sort((a,b)=>{const ao=isOverdue(a),bo=isOverdue(b);if(ao&&!bo)return-1;if(!ao&&bo)return 1;return(PRIO_ORDER[a.priority||'none'])-(PRIO_ORDER[b.priority||'none']);});
+  if(sortMode==='due')return[...tasks].sort((a,b)=>(a.dueDate||'9999')>(b.dueDate||'9999')?1:-1);
+  if(sortMode==='created')return[...tasks].sort((a,b)=>(a.createdAt||'')>(b.createdAt||'')?-1:1);
+  if(sortMode==='priority'||sortPriority)return[...tasks].sort((a,b)=>{const ao=isOverdue(a),bo=isOverdue(b);if(ao&&!bo)return-1;if(!ao&&bo)return 1;return(PRIO_ORDER[a.priority||'none'])-(PRIO_ORDER[b.priority||'none']);});
+  return tasks;
 }
 
 function addTask(opts){
@@ -1560,22 +1698,34 @@ function renderTasks(){
 
   if(!tasks.length){el.innerHTML=estBanner+'<div class="empty"><div class="empty-icon">✅</div><p>No tasks here.</p></div>';return;}
 
-  el.innerHTML=estBanner+'<div id="task-list-inner">'+tasks.map(t=>{
+  const sortBar=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;">
+    <span style="font-size:.78rem;color:var(--text-2)">${tasks.length} task${tasks.length!==1?'s':''}</span>
+    <select class="sort-select" onchange="setSortMode(this.value)">
+      <option value="default" ${sortMode==='default'?'selected':''}>Sort: Default</option>
+      <option value="due" ${sortMode==='due'?'selected':''}>Sort: Due date</option>
+      <option value="created" ${sortMode==='created'?'selected':''}>Sort: Newest</option>
+      <option value="priority" ${sortMode==='priority'?'selected':''}>Sort: Priority</option>
+    </select>
+  </div>`;
+
+  el.innerHTML=estBanner+sortBar+'<div id="task-list-inner">'+tasks.map(t=>{
     const goal=state.goals.find(g=>g.id===t.goalId);
     const cat=goal?(CATS[goal.category]||CATS.other):null;
     const over=isOverdue(t);
     const isExp=expanded.has(t.id);
-    return `<div class="task-item list-item ${over&&!t.done?'overdue-item':''} ${isExp?'is-expanded':''}" draggable="true" data-id="${esc(t.id)}" data-drag="true">
+    const isBulked=bulkSel.has(t.id);
+    return `<div class="task-item list-item ${over&&!t.done?'overdue-item':''} ${isExp?'is-expanded':''} ${isBulked?'bulk-selected':''}" draggable="true" data-id="${esc(t.id)}" data-drag="true">
       <div class="task-row list-item-row">
         <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+          <input type="checkbox" class="task-select-cb" ${isBulked?'checked':''} onchange="toggleBulk('${esc(t.id)}')" title="Select" />
           <span class="drag-handle">⠿</span>
           <input type="checkbox" class="task-check enso-check" ${t.done?'checked':''} onchange="wToggleTask('${esc(t.id)}')" />
           <div class="task-info" style="flex:1;min-width:0;">
-            <div class="task-name details-trigger ${t.done?'done-name':''}" onclick="wExpand('${esc(t.id)}')" style="font-weight:600;font-size:.92rem;color:var(--text-main);">${esc(t.name)}</div>
+            <div id="task-name-${esc(t.id)}" class="task-name details-trigger ${t.done?'done-name':''}" ondblclick="wStartInlineEdit('${esc(t.id)}')" onclick="wExpand('${esc(t.id)}')" style="font-weight:600;font-size:.92rem;color:var(--text-main);">${esc(t.name)}</div>
             <div class="task-meta" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px;">
               ${cat?`<span class="badge badge-cat" style="background:${cat.color};font-size:.68rem">${cat.label}</span>`:''}
-              ${t.dueDate?`<span class="task-date">${fmtDate(t.dueDate)}${over&&!t.done?' <span class="badge badge-over" style="padding:1px 5px">Overdue</span>':''}</span>`:''}
-            ${recurLabel(t)?`<span class="task-date">${recurLabel(t)}</span>`:''}
+              ${t.dueDate?`<span class="task-date">${fmtDate(t.dueDate)}${over&&!t.done?` <span class="badge badge-over" style="padding:1px 5px">Overdue</span></span><button class="reschedule-btn" onclick="wRescheduleToday('${esc(t.id)}')">→ Today</button>`:'</span>'}` :''}
+              ${recurLabel(t)?`<span class="task-date">${recurLabel(t)}</span>`:''}
               ${prioBadgeHtml(t.priority)}${estimateHtml(t.estimate)}${tagsHtml(t.tags)}
               ${t.subtasks.length?`<span style="font-size:.73rem;color:var(--text-3)">${t.subtasks.filter(s=>s.done).length}/${t.subtasks.length} subtasks</span>`:''}
             </div>
@@ -1920,6 +2070,20 @@ function renderReview(){
   // Pomodoro log
   document.getElementById('pomo-log').innerHTML=state.pomodoroLog.slice(0,20).map(p=>`<div class="pomo-entry"><span>${esc(p.taskName)}</span><span class="pomo-dur">${p.duration}m</span></div>`).join('')||'<p style="font-size:.82rem;color:var(--text-3)">No sessions yet.</p>';
 
+  // Habit streaks
+  const habitStreakEl=document.getElementById('habit-streaks-section');
+  if(habitStreakEl){
+    if(!state.habits.length){habitStreakEl.innerHTML='<p style="font-size:.82rem;color:var(--text-3)">No habits tracked yet.</p>';}
+    else{
+      const sorted=[...state.habits].sort((a,b)=>habitStreak(b)-habitStreak(a));
+      habitStreakEl.innerHTML=sorted.map(h=>{
+        const s=habitStreak(h);
+        const done=!!h.log[today];
+        return`<div class="habit-review-row"><span style="font-size:1.1rem">${h.emoji}</span><span class="habit-review-name">${esc(h.name)}</span><span class="habit-review-streak">🔥 ${s}d</span><span style="font-size:.78rem;color:${done?'var(--accent)':'var(--text-3)'}">${done?'✓ Done today':'Not yet'}</span></div>`;
+      }).join('');
+    }
+  }
+
   renderJournalHistory();
 }
 
@@ -2020,7 +2184,8 @@ window.addEventListener('click', function(e) {
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
 function saveNotifPrefs(){const time=document.getElementById('notif-time').value;if(!('Notification'in window)){document.getElementById('notif-status').textContent='Notifications not supported.';return;}Notification.requestPermission().then(p=>{if(p==='granted'){localStorage.setItem(NOTIF_KEY,JSON.stringify({time,enabled:true}));document.getElementById('notif-status').textContent=`Reminder set for ${time} daily ✓`;}else document.getElementById('notif-status').textContent='Permission denied.';});}
-function pollNotifications(){if(Notification.permission!=='granted')return;const prefs=JSON.parse(localStorage.getItem(NOTIF_KEY)||'{}');if(!prefs.enabled||!prefs.time)return;const now=new Date();const[hh,mm]=prefs.time.split(':').map(Number);const target=new Date();target.setHours(hh,mm,0,0);if(Math.abs(now-target)<60000&&localStorage.getItem(NOTIF_LAST)!==todayStr()){localStorage.setItem(NOTIF_LAST,todayStr());const pending=state.tasks.filter(t=>!t.done).length;new Notification('Goal To-Do ✅',{body:`${pending} pending task${pending!==1?'s':''}. Let's go!`});}}
+function pollNotifications(){if(Notification.permission!=='granted')return;const prefs=JSON.parse(localStorage.getItem(NOTIF_KEY)||'{}');if(!prefs.enabled||!prefs.time)return;const now=new Date();const[hh,mm]=prefs.time.split(':').map(Number);const target=new Date();target.setHours(hh,mm,0,0);if(Math.abs(now-target)<60000&&localStorage.getItem(NOTIF_LAST)!==todayStr()){localStorage.setItem(NOTIF_LAST,todayStr());const pending=state.tasks.filter(t=>!t.done).length;new Notification('Goal To-Do ✅',{body:`${pending} pending task${pending!==1?'s':''}. Let's go!`});notifyDueTasks();}}
+function notifyDueTasks(){if(Notification.permission!=='granted')return;const today=todayStr();const dueTasks=state.tasks.filter(t=>!t.done&&(t.dueDate===today||isOverdue(t)));dueTasks.slice(0,3).forEach(t=>{new Notification(isOverdue(t)?'⚠️ Overdue task':'📅 Task due today',{body:t.name});});}
 
 // ─── RENDER ALL ──────────────────────────────────────────────────────────────
 function renderAll(){renderGoals();renderTasks();renderHabits();refreshGoalDrop();const active=document.querySelector('.tab-panel.active');if(active&&active.id==='tab-review')renderReview();}
@@ -2307,6 +2472,35 @@ setInterval(pollNotifications,30000);
 // Auto-init Firebase if config already saved
 const _fbCfg=localStorage.getItem('gd_fb_config');
 if(_fbCfg){try{loadFirebaseSDKs(()=>initFirebase(JSON.parse(_fbCfg)));}catch(e){}}
+
+// Onboarding (show after PIN unlock / initial load)
+setTimeout(showOnboarding, 300);
 </script>
+
+<!-- ONBOARDING OVERLAY -->
+<div id="ob-overlay" style="display:none;">
+  <div class="ob-panel">
+    <div class="ob-dots">
+      <div class="ob-dot active"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+    </div>
+    <div class="ob-icon" id="ob-icon">🎯</div>
+    <div class="ob-title" id="ob-title">Welcome to GoalDo!</div>
+    <div class="ob-sub" id="ob-sub">GoalDo helps you connect daily tasks to the goals that matter. Let's set up your first goal to get started.</div>
+    <button class="btn btn-primary" id="ob-next-btn" onclick="wObNext()">Next →</button>
+    <br><button class="ob-skip" onclick="wObSkip()">Skip setup</button>
+  </div>
+</div>
+
+<!-- BULK ACTION BAR -->
+<div id="bulk-bar">
+  <span class="bulk-count" id="bulk-count">0 selected</span>
+  <button class="bulk-btn" onclick="wBulkDone()">✓ Mark done</button>
+  <button class="bulk-btn" onclick="wBulkToday()">→ Today</button>
+  <button class="bulk-btn" onclick="wBulkDelete()">🗑 Delete</button>
+  <button class="bulk-cancel" onclick="wBulkCancel()">✕ Cancel</button>
+</div>
+
 </body>
 </html>
