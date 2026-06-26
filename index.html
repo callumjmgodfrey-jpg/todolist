@@ -1845,7 +1845,7 @@ function resetRecurring(){
 }
 
 // ─── HISTORY ─────────────────────────────────────────────────────────────────
-function snapshotToday(){const today=todayStr();const tasks=state.tasks.filter(t=>!t.recurring||t.recurring==='none'||t.dueDate===today);const done=tasks.filter(t=>t.done).length;const existing=state.history[today]||{};state.history[today]={done,total:tasks.length,pomodoros:existing.pomodoros||0};persist();}
+function snapshotToday(){const tasks=state.tasks.filter(t=>isActiveToday(t)||(!t.recurring||t.recurring==='none'));const done=tasks.filter(t=>t.done).length;const existing=state.history[todayStr()]||{};state.history[todayStr()]={done,total:tasks.length,pomodoros:existing.pomodoros||0};persist();}
 function calcStreak(){let streak=0,best=0,cur=0;const d=new Date();for(let i=0;i<365;i++){const k=d.toISOString().slice(0,10);const h=state.history[k];if(h&&h.total>0&&h.done===h.total){cur++;if(cur>best)best=cur;if(i===0||streak>0)streak=cur;}else{if(i===0)streak=0;cur=0;}d.setDate(d.getDate()-1);}return{streak,best};}
 
 // ─── CONFETTI ─────────────────────────────────────────────────────────────────
@@ -1892,6 +1892,16 @@ function goalProgress(id){const tasks=state.tasks.filter(t=>t.goalId===id);const
 
 function deadlineBadge(dl){if(!dl)return'';const d=new Date(dl+'T00:00:00');const now=new Date();now.setHours(0,0,0,0);const days=Math.round((d-now)/86400000);if(days<0)return`<span class="badge badge-over">⚠ ${Math.abs(days)}d overdue</span>`;if(days<=7)return`<span class="badge badge-soon">⏰ ${days}d left</span>`;return`<span class="badge badge-ok">📅 ${fmtDate(dl)}</span>`;}
 function isOverdue(t){return!!(t.dueDate&&!t.done&&t.dueDate<todayStr());}
+function isActiveToday(t){
+  const today=todayStr();
+  if(t.dueDate===today)return true;
+  if(!t.recurring||t.recurring==='none')return false;
+  const todayDay=new Date().getDay();
+  if(t.recurring==='daily')return true;
+  if(t.recurring==='weekly'){const anchor=t.dueDate||t.createdAt||today;return new Date(anchor+'T12:00:00').getDay()===todayDay;}
+  if(t.recurring==='days')return(t.recurringDays||[]).includes(todayDay);
+  return false;
+}
 
 const expanded=new Set();
 const expandedGoals=new Set();
@@ -2099,7 +2109,7 @@ window.wObSkip=()=>{document.getElementById('ob-overlay').style.display='none';s
 function filterTasks(tasks){
   const today=todayStr();
   return tasks.filter(t=>{
-    if(taskFilter==='today'&&t.dueDate!==today)return false;
+    if(taskFilter==='today'&&!isActiveToday(t))return false;
     if(taskFilter==='pending'&&t.done)return false;
     if(taskFilter==='done'&&!t.done)return false;
     if(activeTagFilter&&!(t.tags||[]).includes(activeTagFilter))return false;
@@ -2563,7 +2573,7 @@ function renderJournalHistory(){
 function renderReview(){
   const{streak}=calcStreak();
   const today=todayStr();
-  const todayTasks=state.tasks.filter(t=>!t.recurring||t.recurring==='none'||t.dueDate===today);
+  const todayTasks=state.tasks.filter(t=>isActiveToday(t)||(!t.recurring||t.recurring==='none'));
   const todayPomos=(state.history[today]||{}).pomodoros||0;
   document.getElementById('review-stats').innerHTML=`<div class="stat-card"><div class="stat-val">${streak}</div><div class="stat-lbl">Day Streak 🔥</div></div><div class="stat-card"><div class="stat-val">${todayTasks.filter(t=>t.done).length}/${todayTasks.length}</div><div class="stat-lbl">Today's Tasks</div></div><div class="stat-card"><div class="stat-val">${todayPomos}</div><div class="stat-lbl">Pomodoros 🍅</div></div>`;
 
@@ -2711,8 +2721,8 @@ window.addEventListener('click', function(e) {
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
 function saveNotifPrefs(){const time=document.getElementById('notif-time').value;if(!('Notification'in window)){document.getElementById('notif-status').textContent='Notifications not supported.';return;}Notification.requestPermission().then(p=>{if(p==='granted'){localStorage.setItem(NOTIF_KEY,JSON.stringify({time,enabled:true}));document.getElementById('notif-status').textContent=`Reminder set for ${time} daily ✓`;}else document.getElementById('notif-status').textContent='Permission denied.';});}
-function pollNotifications(){if(Notification.permission!=='granted')return;const prefs=JSON.parse(localStorage.getItem(NOTIF_KEY)||'{}');if(!prefs.enabled||!prefs.time)return;const now=new Date();const[hh,mm]=prefs.time.split(':').map(Number);const target=new Date();target.setHours(hh,mm,0,0);if(Math.abs(now-target)<60000&&localStorage.getItem(NOTIF_LAST)!==todayStr()){localStorage.setItem(NOTIF_LAST,todayStr());const today=todayStr();const todayTasks=state.tasks.filter(t=>!t.done&&t.dueDate===today);const overdue=state.tasks.filter(t=>!t.done&&isOverdue(t));const lines=[];if(overdue.length)lines.push(`⚠️ ${overdue.length} overdue`);if(todayTasks.length){lines.push(`📅 Today's tasks:`);todayTasks.slice(0,4).forEach(t=>lines.push(`  • ${t.name}`));if(todayTasks.length>4)lines.push(`  …and ${todayTasks.length-4} more`);}if(!lines.length)lines.push('Nothing due today — great job! 🎉');new Notification('GoalDo ✅',{body:lines.join('\n')});}}
-function notifyDueTasks(){if(Notification.permission!=='granted')return;const today=todayStr();const dueTasks=state.tasks.filter(t=>!t.done&&(t.dueDate===today||isOverdue(t)));dueTasks.slice(0,3).forEach(t=>{new Notification(isOverdue(t)?'⚠️ Overdue task':'📅 Task due today',{body:t.name});});}
+function pollNotifications(){if(Notification.permission!=='granted')return;const prefs=JSON.parse(localStorage.getItem(NOTIF_KEY)||'{}');if(!prefs.enabled||!prefs.time)return;const now=new Date();const[hh,mm]=prefs.time.split(':').map(Number);const target=new Date();target.setHours(hh,mm,0,0);if(Math.abs(now-target)<60000&&localStorage.getItem(NOTIF_LAST)!==todayStr()){localStorage.setItem(NOTIF_LAST,todayStr());const today=todayStr();const todayTasks=state.tasks.filter(t=>!t.done&&isActiveToday(t));const overdue=state.tasks.filter(t=>!t.done&&isOverdue(t));const lines=[];if(overdue.length)lines.push(`⚠️ ${overdue.length} overdue`);if(todayTasks.length){lines.push(`📅 Today's tasks:`);todayTasks.slice(0,4).forEach(t=>lines.push(`  • ${t.name}`));if(todayTasks.length>4)lines.push(`  …and ${todayTasks.length-4} more`);}if(!lines.length)lines.push('Nothing due today — great job! 🎉');new Notification('GoalDo ✅',{body:lines.join('\n')});}}
+function notifyDueTasks(){if(Notification.permission!=='granted')return;const today=todayStr();const dueTasks=state.tasks.filter(t=>!t.done&&(isActiveToday(t)||isOverdue(t)));dueTasks.slice(0,3).forEach(t=>{new Notification(isOverdue(t)?'⚠️ Overdue task':'📅 Task due today',{body:t.name});});}
 
 // ─── TIME TRACKING ───────────────────────────────────────────────────────────
 let activeTimeTrack=null; // {taskId, start}
@@ -2799,7 +2809,7 @@ window.openWeeklyReview=()=>document.getElementById('weekly-review-overlay').cla
 window.wApplySuggestedOrder=()=>{
   const todayS=todayStr();
   const PRIO_SCORE={high:0,medium:1,low:2,none:3};
-  const todayIds=new Set(state.tasks.filter(t=>t.dueDate===todayS).map(t=>t.id));
+  const todayIds=new Set(state.tasks.filter(t=>isActiveToday(t)).map(t=>t.id));
   const todaySorted=[...state.tasks].filter(t=>todayIds.has(t.id)).sort((a,b)=>{
     if(a.done!==b.done)return a.done?1:-1;
     const pd=(PRIO_SCORE[a.priority||'none'])-(PRIO_SCORE[b.priority||'none']);
@@ -2850,7 +2860,7 @@ function renderDashboard(){
 
   // Today's tasks with suggested order
   const PRIO_SCORE={high:0,medium:1,low:2,none:3};
-  const todayTasks=allTasks.filter(t=>t.dueDate===todayS);
+  const todayTasks=allTasks.filter(t=>isActiveToday(t));
   const suggested=[...todayTasks].sort((a,b)=>{
     // Overdue-style urgency: undone first, done last
     if(a.done!==b.done)return a.done?1:-1;
@@ -3260,7 +3270,7 @@ function renderWinHistory(){
 function maybePromptWin(){
   const today=todayStr();
   if(state.wins&&state.wins[today])return;
-  const todayTasks=state.tasks.filter(t=>t.dueDate===today||(!t.dueDate&&t.recurring==='none'));
+  const todayTasks=state.tasks.filter(t=>isActiveToday(t)||(!t.dueDate&&t.recurring==='none'));
   const allDone=todayTasks.length>0&&todayTasks.every(t=>t.done);
   if(!allDone)return;
   setTimeout(()=>{switchTab('review');const inp=document.getElementById('win-input');if(inp){inp.focus();inp.scrollIntoView({behavior:'smooth',block:'center'});}},400);
@@ -3376,7 +3386,7 @@ const DI_KEY='gd_di_last';let diSelected=null;
 function checkDailyIntention(){
   if(localStorage.getItem(DI_KEY)===todayStr())return;
   const today=todayStr();
-  const todayTasks=state.tasks.filter(t=>!t.done&&t.dueDate===today);
+  const todayTasks=state.tasks.filter(t=>!t.done&&isActiveToday(t));
   if(!todayTasks.length)return;
   diSelected=null;
   document.getElementById('di-task-list').innerHTML=todayTasks.slice(0,6).map(t=>`<button class="di-task-btn" id="di-btn-${esc(t.id)}" onclick="diSelect('${esc(t.id)}')">${esc(t.name)}</button>`).join('');
@@ -3617,7 +3627,7 @@ function refreshParentDrop(){
 function renderSchedule(){
   const el=document.getElementById('dash-schedule');if(!el)return;
   const today=todayStr();
-  const tasks=state.tasks.filter(t=>t.dueDate===today&&!t.done&&t.estimate>0)
+  const tasks=state.tasks.filter(t=>isActiveToday(t)&&!t.done&&t.estimate>0)
     .sort((a,b)=>(({high:0,medium:1,low:2,none:3})[a.priority||'none'])-({high:0,medium:1,low:2,none:3})[b.priority||'none']);
   if(!tasks.length){el.innerHTML='<p style="font-size:.82rem;color:var(--text-3)">Add time estimates to today\'s tasks to see a schedule.</p>';return;}
   const START_H=9;let mins=START_H*60;
@@ -3790,8 +3800,8 @@ function buildSystemPrompt(){
   const tasks=state.tasks.filter(t=>!t.done).slice(0,25).map(t=>`- ${t.name}${t.dueDate?' [due '+t.dueDate+']':''}${t.priority&&t.priority!=='none'?' ['+t.priority+']':''}${isOverdue(t)?' [OVERDUE]':''}`).join('\n')||'None pending.';
   const {streak}=calcStreak();
   const today=todayStr();
-  const todayDone=state.tasks.filter(t=>t.done&&t.dueDate===today).length;
-  const todayTotal=state.tasks.filter(t=>t.dueDate===today).length;
+  const todayDone=state.tasks.filter(t=>t.done&&isActiveToday(t)).length;
+  const todayTotal=state.tasks.filter(t=>isActiveToday(t)).length;
   return `You are Claude, an AI productivity coach built into GoalDo — the user's personal goal and task manager. You have real-time context about their goals and tasks below. Be warm, concise, and actionable. Use bullet points when listing things. Celebrate wins. Keep replies under ~200 words unless asked for more detail.
 
 DATE: ${today} | STREAK: ${streak} days | TODAY: ${todayDone}/${todayTotal} tasks done
