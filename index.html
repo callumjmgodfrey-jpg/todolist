@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Goal To-Do</title>
+  <title>GoalDo</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#d32f2f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="GoalDo" />
   <script>
     (function(){
       try{var s=JSON.parse(localStorage.getItem('goal_todo_v4')||'{}');var t=(s.settings||{}).theme||'auto';if(t!=='auto')document.documentElement.setAttribute('data-theme',t);}catch(e){}
@@ -704,6 +709,64 @@
     /* NOTIF */
     .notif-section{max-width:440px;}
 
+    /* COLOUR-CODED TASK BORDERS */
+    .task-item.has-goal-color{border-left:3px solid var(--task-goal-color,var(--border));}
+
+    /* FOCUS SESSION */
+    #focus-session-overlay{position:fixed;inset:0;background:var(--bg);z-index:9000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;}
+    #focus-session-overlay.open{display:flex;}
+    .fs-task-name{font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:8px;max-width:480px;}
+    .fs-goal-label{font-size:.85rem;color:var(--text-2);margin-bottom:32px;}
+    .fs-timer{font-size:4rem;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;margin-bottom:24px;}
+    .fs-progress{width:200px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 32px;}
+    .fs-progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 1s linear;}
+    .fs-btns{display:flex;gap:12px;justify-content:center;}
+    .fs-quit{font-size:.8rem;color:var(--text-3);background:none;border:none;cursor:pointer;margin-top:16px;text-decoration:underline;}
+
+    /* DAILY INTENTION */
+    #daily-intention-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:8500;display:none;align-items:center;justify-content:center;}
+    #daily-intention-overlay.open{display:flex;}
+    .di-box{background:var(--surface);border-radius:var(--radius-lg);padding:28px;max-width:400px;width:90%;text-align:center;}
+    .di-title{font-size:1.2rem;font-weight:800;margin-bottom:8px;}
+    .di-sub{font-size:.85rem;color:var(--text-2);margin-bottom:20px;}
+    .di-task-btn{width:100%;text-align:left;padding:10px 14px;background:var(--surface-2);border:2px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer;font-size:.88rem;font-family:inherit;color:var(--text);}
+    .di-task-btn:hover,.di-task-btn.selected{border-color:var(--accent);background:var(--accent-light);}
+    .di-pinned{background:var(--accent-light);border-left:3px solid var(--accent);border-radius:var(--radius);padding:8px 12px;font-size:.85rem;font-weight:600;margin-bottom:6px;}
+
+    /* DEADLINE WARNING */
+    .deadline-warning{background:var(--warning-light);border:1px solid var(--warning);border-radius:var(--radius);padding:7px 12px;font-size:.8rem;color:var(--warning);font-weight:600;margin-top:8px;display:flex;align-items:center;gap:6px;}
+
+    /* GOAL CELEBRATION */
+    #goal-celebrate-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:8800;display:none;align-items:center;justify-content:center;}
+    #goal-celebrate-overlay.open{display:flex;}
+    .gc-box{background:var(--surface);border-radius:var(--radius-lg);padding:32px;max-width:380px;width:90%;text-align:center;}
+    .gc-icon{font-size:3rem;margin-bottom:12px;}
+    .gc-title{font-size:1.3rem;font-weight:900;margin-bottom:6px;}
+    .gc-sub{font-size:.85rem;color:var(--text-2);margin-bottom:20px;}
+
+    /* EFFORT/IMPACT MATRIX */
+    #matrix-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:8600;display:none;align-items:center;justify-content:center;padding:12px;}
+    #matrix-overlay.open{display:flex;}
+    .matrix-box{background:var(--surface);border-radius:var(--radius-lg);padding:20px;max-width:560px;width:100%;}
+    .matrix-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:340px;margin-top:10px;}
+    .matrix-cell{border-radius:var(--radius);padding:8px;border:2px dashed var(--border);overflow-y:auto;position:relative;}
+    .matrix-cell-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);margin-bottom:4px;}
+    .matrix-cell.q1{border-color:#22c55e;background:#22c55e11;}
+    .matrix-cell.q2{border-color:#f59e0b;background:#f59e0b11;}
+    .matrix-cell.q3{border-color:#6c63ff;background:#6c63ff11;}
+    .matrix-cell.q4{border-color:var(--border);}
+    .matrix-task-chip{font-size:.75rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:3px 7px;margin:2px;display:inline-block;cursor:pointer;}
+    .matrix-task-chip:hover{border-color:var(--accent);}
+    .matrix-axes{display:grid;grid-template-columns:auto 1fr;gap:4px;align-items:center;font-size:.7rem;color:var(--text-3);margin-bottom:4px;}
+
+    /* MONTHLY REPORT */
+    .monthly-stat{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+    .monthly-stat:last-child{border-bottom:none;}
+    .monthly-stat-val{font-weight:800;color:var(--accent);}
+
+    /* RECUR UNTIL */
+    #t-recur-until-wrap{display:none;}
+
     /* STREAK CALENDAR */
     .streak-cal{display:grid;grid-template-columns:repeat(53,1fr);gap:2px;margin-top:8px;overflow-x:auto;}
     .sc-cell{aspect-ratio:1;border-radius:2px;background:var(--border);min-width:10px;}
@@ -1220,6 +1283,7 @@
           <button type="button" class="day-btn" data-day="6" onclick="toggleDay(this)">Sa</button>
           <button type="button" class="day-btn" data-day="0" onclick="toggleDay(this)">Su</button>
         </div>
+        <div id="t-recur-until-wrap" style="margin-top:6px;"><label style="font-size:.78rem;color:var(--text-2)">Stop repeating after</label><input type="date" id="t-recur-until" style="margin-top:2px;width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;color:var(--text);font-size:.83rem;" /></div>
       </div>
     </div>
     <div class="form-row">
@@ -1238,6 +1302,7 @@
     <div class="view-toggle">
       <button class="view-btn active" id="view-list-btn" onclick="setTaskView('list')">☰</button>
       <button class="view-btn" id="view-week-btn" onclick="setTaskView('week')">📅</button>
+      <button class="view-btn" title="Effort/Impact matrix" onclick="openMatrix()">⊞</button>
     </div>
   </div>
   <div id="tag-filter-row" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;"></div>
@@ -1308,6 +1373,7 @@
     <button class="btn btn-ghost btn-sm" onclick="exportICal()">Export iCal</button>
     <button class="btn btn-ghost btn-sm" onclick="exportPDF()">Print / PDF</button>
     <button class="btn btn-ghost btn-sm" onclick="copyWeeklyDigest()">📋 Copy weekly digest</button>
+    <button class="btn btn-ghost btn-sm" onclick="openMonthlyReport()">📊 Monthly report</button>
   </div>
 </section>
 
@@ -1591,7 +1657,7 @@ function loadState(){
       s.records=s.records||{bestStreak:0,mostTasksDay:0,mostPomos:0};
       s.settings.dashOrder=s.settings.dashOrder||['overview','cats','today','upcoming','time'];
       s.settings.dashHidden=s.settings.dashHidden||[];
-      s.tasks=(s.tasks||[]).map(t=>({...t,priority:t.priority||'none',tags:t.tags||[],estimate:t.estimate||0,recurringDays:t.recurringDays||[],timeLog:t.timeLog||[],blockedBy:t.blockedBy||[]}));
+      s.tasks=(s.tasks||[]).map(t=>({...t,priority:t.priority||'none',tags:t.tags||[],estimate:t.estimate||0,recurringDays:t.recurringDays||[],timeLog:t.timeLog||[],blockedBy:t.blockedBy||[],recurUntil:t.recurUntil||'',matrixQ:t.matrixQ||''}));
       return s;
     }
   }catch(e){}
@@ -1616,6 +1682,7 @@ function getWeekStart(offset){const d=new Date();d.setDate(d.getDate()+offset*7)
 function resetRecurring(){
   const today=todayStr();const ws=getWeekStart(0);const todayDay=new Date().getDay();
   state.tasks.forEach(t=>{
+    if(t.recurUntil&&today>t.recurUntil){t.recurring='none';return;}
     if(t.done&&t.recurring==='daily'&&t.lastReset!==today){t.done=false;t.lastReset=today;}
     if(t.done&&t.recurring==='weekly'&&t.lastReset<ws){t.done=false;t.lastReset=today;}
     if(t.recurring==='days'&&(t.recurringDays||[]).includes(todayDay)&&t.lastReset!==today){t.done=false;t.lastReset=today;}
@@ -1773,6 +1840,7 @@ function renderGoals(){
         ${ms.length?`<div style="font-size:.74rem;color:var(--text-2);margin-top:3px">Milestones: ${msDone}/${ms.length}</div>`:''}
         ${msSection}
         ${checkinStars(g.id,g.checkins)}
+        ${deadlineWarningHtml(g)}
         <div class="goal-notes-section">
           <div style="font-size:.72rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Notes</div>
           <textarea id="gnotes-${esc(g.id)}" class="goal-notes-ta" rows="2" placeholder="Scratchpad for this goal…" onblur="wSaveGoalNotes('${esc(g.id)}')">${esc(g.notes||'')}</textarea>
@@ -1788,8 +1856,8 @@ function renderGoals(){
       </div>`;
     }).join('');
   }
-  // Check for newly completed goals → confetti
-  active.forEach(g=>{const p=goalProgress(g.id);if(p.total>0&&p.pct===100&&!g._celebrated){g._celebrated=true;launchConfetti();}if(p.pct<100)g._celebrated=false;});
+  // Check for newly completed goals → celebration modal (oneoff) or confetti (ongoing)
+  active.forEach(g=>{const p=goalProgress(g.id);if(p.total>0&&p.pct===100&&!g._celebrated){g._celebrated=true;if(g.mode!=='ongoing'){showGoalCelebration(g);}else{launchConfetti();}}if(p.pct<100)g._celebrated=false;});
   const archEl=document.getElementById('archived-list');
   if(archEl){const archived=state.goals.filter(g=>g.archived);archEl.innerHTML=archived.length?archived.map(g=>`<div class="archived-goal"><span>${esc(g.title)}</span><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="wUnarchive('${esc(g.id)}')">Restore</button><button class="btn btn-danger btn-sm" onclick="wDeleteGoal('${esc(g.id)}')">Delete</button></div></div>`).join(''):'<p style="font-size:.83rem;color:var(--text-3);padding:8px 0">No archived goals.</p>';}
   refreshGoalDrop();
@@ -1895,7 +1963,8 @@ function addTask(opts){
   const tagsRaw=opts?'':(document.getElementById('t-tags').value||'');
   const recur=opts?'none':document.getElementById('t-recur').value;
   const recurDays=(!opts&&recur==='days')?getSelectedDays():[];
-  const t={id:uid(),name,goalId:opts?(opts.goalId||''):document.getElementById('t-goal').value,dueDate:opts?(opts.dueDate||''):document.getElementById('t-due').value,recurring:recur,recurringDays:recurDays,priority:opts?(opts.priority||'none'):document.getElementById('t-priority').value,tags:opts?[]:(tagsRaw?parseTags(tagsRaw):[]),estimate:opts?0:parseInt(document.getElementById('t-estimate').value||'0')||0,notes:'',subtasks:[],done:false,lastReset:'',createdAt:todayStr()};
+  const recurUntil=opts?'':(document.getElementById('t-recur-until')?.value||'');
+  const t={id:uid(),name,goalId:opts?(opts.goalId||''):document.getElementById('t-goal').value,dueDate:opts?(opts.dueDate||''):document.getElementById('t-due').value,recurring:recur,recurringDays:recurDays,recurUntil,priority:opts?(opts.priority||'none'):document.getElementById('t-priority').value,tags:opts?[]:(tagsRaw?parseTags(tagsRaw):[]),estimate:opts?0:parseInt(document.getElementById('t-estimate').value||'0')||0,notes:'',subtasks:[],done:false,lastReset:'',createdAt:todayStr()};
   state.tasks.push(t);persist();
   if(!opts)resetTaskForm();
   renderAll();
@@ -1932,7 +2001,7 @@ window.wSaveNotes=tid=>{const ta=document.getElementById('notes-'+tid);if(!ta)re
 window.wAssignGoal=(tid,gid)=>{const t=state.tasks.find(x=>x.id===tid);if(t){t.goalId=gid;persist();renderTasks();renderGoals();}};
 
 const DAY_NAMES=['Su','Mo','Tu','We','Th','Fr','Sa'];
-function toggleDayPicker(val){const el=document.getElementById('t-day-picker');if(el)el.style.display=val==='days'?'flex':'none';}
+function toggleDayPicker(val){const el=document.getElementById('t-day-picker');if(el)el.style.display=val==='days'?'flex':'none';const uw=document.getElementById('t-recur-until-wrap');if(uw)uw.style.display=val!=='none'?'block':'none';}
 function toggleDay(btn){btn.classList.toggle('on');}
 function getSelectedDays(){return[...document.querySelectorAll('#t-day-picker .day-btn.on')].map(b=>parseInt(b.dataset.day));}
 function recurLabel(t){
@@ -1944,7 +2013,7 @@ function recurLabel(t){
   }
   return'';
 }
-function resetTaskForm(){document.getElementById('t-name').value='';document.getElementById('t-due').value='';document.getElementById('t-recur').value='none';document.getElementById('t-priority').value='none';document.getElementById('t-tags').value='';document.getElementById('t-estimate').value='';toggleDayPicker('none');document.querySelectorAll('#t-day-picker .day-btn').forEach(b=>b.classList.remove('on'));}
+function resetTaskForm(){document.getElementById('t-name').value='';document.getElementById('t-due').value='';document.getElementById('t-recur').value='none';document.getElementById('t-priority').value='none';document.getElementById('t-tags').value='';document.getElementById('t-estimate').value='';const ru=document.getElementById('t-recur-until');if(ru)ru.value='';toggleDayPicker('none');document.querySelectorAll('#t-day-picker .day-btn').forEach(b=>b.classList.remove('on'));}
 
 function prioBadgeHtml(p){if(!p||p==='none')return'';return`<span class="badge badge-prio-${p}">${PRIO_LABEL[p]}</span>`;}
 
@@ -1985,7 +2054,8 @@ function renderTasks(){
     const isTracking=activeTimeTrack&&activeTimeTrack.taskId===t.id;
     const loggedMins=totalLogged(t);
     const blockers=(t.blockedBy||[]).map(bid=>state.tasks.find(x=>x.id===bid)).filter(Boolean);
-    return `<div class="task-item list-item ${over&&!t.done?'overdue-item':''} ${isExp?'is-expanded':''} ${isBulked?'bulk-selected':''} ${blocked&&!t.done?'task-blocked':''}" draggable="true" data-id="${esc(t.id)}" data-drag="true">
+    const goalColor=cat?cat.color:'';
+    return `<div class="task-item list-item ${over&&!t.done?'overdue-item':''} ${isExp?'is-expanded':''} ${isBulked?'bulk-selected':''} ${blocked&&!t.done?'task-blocked':''} ${goalColor?'has-goal-color':''}" draggable="true" data-id="${esc(t.id)}" data-drag="true" ${goalColor?`style="--task-goal-color:${goalColor}"`:''} >
       <div class="task-row list-item-row">
         <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
           <input type="checkbox" class="task-select-cb" ${isBulked?'checked':''} onchange="toggleBulk('${esc(t.id)}')" title="Select" />
@@ -2007,6 +2077,7 @@ function renderTasks(){
         <div class="task-btns hover-actions">
           <button class="time-track-btn ${isTracking?'running':''}" onclick="wStartTimeTrack('${esc(t.id)}')" title="${isTracking?'Stop timer':'Track time'}">⏱</button>
           <button class="focus-btn" onclick="startTimer('${esc(t.id)}','${esc(t.name)}')" title="Pomodoro">🍅</button>
+          <button class="fm-btn" onclick="openFocusSession('${esc(t.id)}')" title="Focus session">🎯</button>
           <button class="fm-btn" onclick="openFocusMode('${esc(t.id)}')" title="Focus mode">⛶</button>
           <button class="expand-btn" onclick="wExpand('${esc(t.id)}')">${isExp?'▲':'▼'}</button>
           <button class="del-task-btn" onclick="wDeleteTask('${esc(t.id)}')">🗑</button>
@@ -2675,6 +2746,154 @@ function renderDashboard(){
   renderSchedule();
 }
 
+// ─── FOCUS SESSION ───────────────────────────────────────────────────────────
+let fsInterval=null,fsSecondsLeft=0,fsTotalSeconds=1500,fsTaskId=null,fsPaused=false;
+function openFocusSession(id){
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  fsTaskId=id;fsTotalSeconds=(t.estimate||25)*60;fsSecondsLeft=fsTotalSeconds;fsPaused=false;
+  const g=state.goals.find(x=>x.id===t.goalId);
+  document.getElementById('fs-task-name').textContent=t.name;
+  document.getElementById('fs-goal-label').textContent=g?'Goal: '+g.title:'';
+  updateFsDisplay();
+  document.getElementById('focus-session-overlay').classList.add('open');
+  fsInterval=setInterval(fsTick,1000);
+}
+function fsTick(){
+  if(fsPaused)return;
+  fsSecondsLeft--;
+  updateFsDisplay();
+  if(fsSecondsLeft<=0){clearInterval(fsInterval);fsDone();}
+}
+function updateFsDisplay(){
+  const m=Math.floor(fsSecondsLeft/60),s=fsSecondsLeft%60;
+  document.getElementById('fs-timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const pct=Math.round((1-fsSecondsLeft/fsTotalSeconds)*100);
+  document.getElementById('fs-progress-fill').style.width=pct+'%';
+}
+function fsPause(){fsPaused=!fsPaused;document.getElementById('fs-pause-btn').textContent=fsPaused?'▶ Resume':'⏸ Pause';}
+function fsDone(){clearInterval(fsInterval);document.getElementById('focus-session-overlay').classList.remove('open');if(fsTaskId){wToggleTask(fsTaskId);}playZenChime();}
+function fsQuit(){clearInterval(fsInterval);document.getElementById('focus-session-overlay').classList.remove('open');}
+
+// ─── DAILY INTENTION ─────────────────────────────────────────────────────────
+const DI_KEY='gd_di_last';let diSelected=null;
+function checkDailyIntention(){
+  if(localStorage.getItem(DI_KEY)===todayStr())return;
+  const today=todayStr();
+  const todayTasks=state.tasks.filter(t=>!t.done&&t.dueDate===today);
+  if(!todayTasks.length)return;
+  diSelected=null;
+  document.getElementById('di-task-list').innerHTML=todayTasks.slice(0,6).map(t=>`<button class="di-task-btn" id="di-btn-${esc(t.id)}" onclick="diSelect('${esc(t.id)}')">${esc(t.name)}</button>`).join('');
+  setTimeout(()=>document.getElementById('daily-intention-overlay').classList.add('open'),800);
+}
+function diSelect(id){diSelected=id;document.querySelectorAll('.di-task-btn').forEach(b=>b.classList.remove('selected'));const b=document.getElementById('di-btn-'+id);if(b)b.classList.add('selected');}
+function diConfirm(){
+  document.getElementById('daily-intention-overlay').classList.remove('open');
+  localStorage.setItem(DI_KEY,todayStr());
+  if(!diSelected)return;
+  // Pin selected task to top of today's tasks
+  const idx=state.tasks.findIndex(x=>x.id===diSelected);
+  if(idx>0){const[t]=state.tasks.splice(idx,1);state.tasks.unshift(t);persist();}
+  renderTasks();
+}
+function diSkip(){document.getElementById('daily-intention-overlay').classList.remove('open');localStorage.setItem(DI_KEY,todayStr());}
+
+// ─── GOAL CELEBRATION ────────────────────────────────────────────────────────
+let celebrateGoalId=null;
+function showGoalCelebration(g){
+  celebrateGoalId=g.id;
+  const prog=goalProgress(g.id);
+  document.getElementById('gc-title').textContent='🎉 '+g.title+' — Complete!';
+  document.getElementById('gc-sub').textContent=`You finished all ${prog.total} tasks. Amazing work!`;
+  document.getElementById('goal-celebrate-overlay').classList.add('open');
+  launchConfetti();
+}
+window.gcArchive=()=>{document.getElementById('goal-celebrate-overlay').classList.remove('open');if(celebrateGoalId){const g=state.goals.find(x=>x.id===celebrateGoalId);if(g){g.archived=true;persist();renderGoals();}}};
+window.gcDismiss=()=>{document.getElementById('goal-celebrate-overlay').classList.remove('open');};
+
+// ─── DEADLINE WARNING ────────────────────────────────────────────────────────
+function deadlineWarningHtml(g){
+  if(!g.deadline||g.mode==='ongoing')return'';
+  const daysLeft=Math.ceil((new Date(g.deadline)-new Date(todayStr()))/(86400000));
+  const prog=goalProgress(g.id);
+  if(daysLeft>=0&&daysLeft<=7&&prog.pct<50&&prog.total>0){
+    return`<div class="deadline-warning">⚠️ ${daysLeft===0?'Due today':daysLeft+' days left'} — only ${prog.pct}% complete</div>`;
+  }
+  return'';
+}
+
+// ─── EFFORT/IMPACT MATRIX ────────────────────────────────────────────────────
+let mxPending={};
+function openMatrix(){
+  mxPending={};
+  const todayTasks=state.tasks.filter(t=>!t.done);
+  const byQ={high:[],medium:[],low:[],none:[]};
+  todayTasks.forEach(t=>byQ[t.priority||'none'].push(t));
+  ['high','medium','low','none'].forEach((p,qi)=>{
+    const el=document.getElementById(['mx-q1','mx-q2','mx-q3','mx-q4'][qi]+'-tasks');
+    if(el)el.innerHTML=byQ[p].map(t=>`<div class="matrix-task-chip" draggable="true" data-id="${esc(t.id)}" ondragstart="mxDragStart(event,'${esc(t.id)}')">${esc(t.name.slice(0,28))}</div>`).join('');
+  });
+  document.getElementById('matrix-overlay').classList.add('open');
+}
+function closeMatrix(){document.getElementById('matrix-overlay').classList.remove('open');}
+let mxDragging=null;
+function mxDragStart(e,id){mxDragging=id;}
+function mxDrop(e,prio){
+  e.preventDefault();if(!mxDragging)return;
+  mxPending[mxDragging]=prio;mxDragging=null;
+}
+function mxApply(){
+  Object.entries(mxPending).forEach(([id,prio])=>{const t=state.tasks.find(x=>x.id===id);if(t)t.priority=prio;});
+  persist();closeMatrix();renderTasks();
+}
+
+// ─── MONTHLY REPORT ──────────────────────────────────────────────────────────
+function openMonthlyReport(){
+  const now=new Date();const yr=now.getFullYear();const mo=now.getMonth();
+  const monthStart=`${yr}-${String(mo+1).padStart(2,'0')}-01`;
+  const monthEnd=`${yr}-${String(mo+1).padStart(2,'0')}-${String(new Date(yr,mo+1,0).getDate()).padStart(2,'0')}`;
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const label=MONTHS[mo]+' '+yr;
+  // tasks done this month
+  const doneTasks=Object.entries(state.history).filter(([d])=>d>=monthStart&&d<=monthEnd).reduce((a,[,h])=>a+(h.done||0),0);
+  const totalDays=Object.entries(state.history).filter(([d])=>d>=monthStart&&d<=monthEnd&&((state.history[d]||{}).done||0)>0).length;
+  const pomos=Object.entries(state.history).filter(([d])=>d>=monthStart&&d<=monthEnd).reduce((a,[,h])=>a+(h.pomodoros||0),0);
+  const habitsComp=state.habits.map(h=>{const days=Object.keys(h.log).filter(d=>d>=monthStart&&d<=monthEnd).length;return{name:h.emoji+' '+h.name,days};}).sort((a,b)=>b.days-a.days);
+  const goalsSummary=state.goals.filter(g=>!g.archived).map(g=>{const p=goalProgress(g.id);return{title:g.title,pct:p.pct};}).sort((a,b)=>b.pct-a.pct);
+  const bodyHtml=`
+    <div style="font-size:.9rem;font-weight:700;color:var(--text-2);margin-bottom:12px">${label}</div>
+    <div class="monthly-stat"><span>✅ Tasks completed</span><span class="monthly-stat-val">${doneTasks}</span></div>
+    <div class="monthly-stat"><span>📅 Active days</span><span class="monthly-stat-val">${totalDays}</span></div>
+    <div class="monthly-stat"><span>🍅 Pomodoros</span><span class="monthly-stat-val">${pomos}</span></div>
+    <div style="margin:12px 0 6px;font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--text-2)">Habit consistency</div>
+    ${habitsComp.length?habitsComp.map(h=>`<div class="monthly-stat"><span>${esc(h.name)}</span><span class="monthly-stat-val">${h.days}d</span></div>`).join(''):'<p style="font-size:.82rem;color:var(--text-3)">No habits tracked.</p>'}
+    <div style="margin:12px 0 6px;font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--text-2)">Goal progress</div>
+    ${goalsSummary.length?goalsSummary.map(g=>`<div class="monthly-stat"><span>${esc(g.title)}</span><span class="monthly-stat-val">${g.pct}%</span></div>`).join(''):'<p style="font-size:.82rem;color:var(--text-3)">No active goals.</p>'}
+  `;
+  document.getElementById('monthly-report-title').textContent='📊 '+label;
+  document.getElementById('monthly-report-body').innerHTML=bodyHtml;
+  document.getElementById('monthly-report-overlay').classList.add('open');
+}
+function closeMonthlyReport(){document.getElementById('monthly-report-overlay').classList.remove('open');}
+function copyMonthlyReport(){
+  const el=document.getElementById('monthly-report-body');
+  const text=el.innerText||el.textContent;
+  navigator.clipboard.writeText(text).then(()=>alert('Report copied!')).catch(()=>alert(text));
+}
+
+// ─── RECUR UNTIL ─────────────────────────────────────────────────────────────
+function toggleDayPickerFull(val){
+  const el=document.getElementById('t-day-picker');if(el)el.style.display=val==='days'?'flex':'none';
+  const uw=document.getElementById('t-recur-until-wrap');if(uw)uw.style.display=val!=='none'?'block':'none';
+}
+
+// ─── KEYBOARD SHORTCUTS ──────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;
+  if(e.key==='n'||e.key==='N'){e.preventDefault();openQuickAdd();}
+  if(e.key==='/'||e.key==='s'){e.preventDefault();openSearch();}
+  if(e.key==='Escape'){closeQuickAdd();closeSearch();fsQuit();closeMatrix();closeMonthlyReport();}
+});
+
 // ─── OLED / THEME ────────────────────────────────────────────────────────────
 // cycleTheme already handles oled via THEMES array
 
@@ -3121,6 +3340,7 @@ if(_fbCfg){try{loadFirebaseSDKs(()=>initFirebase(JSON.parse(_fbCfg)));}catch(e){
 setTimeout(showOnboarding, 300);
 // Weekly review prompt (Sundays)
 setTimeout(checkWeeklyReview, 2000);
+setTimeout(checkDailyIntention, 3000);
 </script>
 
 <!-- ONBOARDING OVERLAY -->
@@ -3136,6 +3356,83 @@ setTimeout(checkWeeklyReview, 2000);
     <div class="ob-sub" id="ob-sub">GoalDo helps you connect daily tasks to the goals that matter. Let's set up your first goal to get started.</div>
     <button class="btn btn-primary" id="ob-next-btn" onclick="wObNext()">Next →</button>
     <br><button class="ob-skip" onclick="wObSkip()">Skip setup</button>
+  </div>
+</div>
+
+<!-- FOCUS SESSION OVERLAY -->
+<div id="focus-session-overlay">
+  <div class="fs-task-name" id="fs-task-name"></div>
+  <div class="fs-goal-label" id="fs-goal-label"></div>
+  <div class="fs-timer" id="fs-timer">25:00</div>
+  <div class="fs-progress"><div class="fs-progress-fill" id="fs-progress-fill" style="width:0%"></div></div>
+  <div class="fs-btns">
+    <button class="btn btn-primary" onclick="fsPause()" id="fs-pause-btn">⏸ Pause</button>
+    <button class="btn btn-ghost" onclick="fsDone()">✓ Done</button>
+  </div>
+  <button class="fs-quit" onclick="fsQuit()">Exit focus mode</button>
+</div>
+
+<!-- DAILY INTENTION OVERLAY -->
+<div id="daily-intention-overlay">
+  <div class="di-box">
+    <div class="di-icon" style="font-size:2rem;margin-bottom:8px">🌅</div>
+    <div class="di-title">Good morning!</div>
+    <div class="di-sub">What's your #1 priority today? Pick one task to pin to the top.</div>
+    <div id="di-task-list"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="diConfirm()">Let's go →</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="diSkip()">Skip for today</button>
+  </div>
+</div>
+
+<!-- GOAL CELEBRATION OVERLAY -->
+<div id="goal-celebrate-overlay">
+  <div class="gc-box">
+    <div class="gc-icon">🎉</div>
+    <div class="gc-title" id="gc-title">Goal Complete!</div>
+    <div class="gc-sub" id="gc-sub"></div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="gcArchive()">Archive this goal</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%" onclick="gcDismiss()">Keep it active</button>
+  </div>
+</div>
+
+<!-- EFFORT/IMPACT MATRIX OVERLAY -->
+<div id="matrix-overlay">
+  <div class="matrix-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div style="font-weight:700;font-size:.95rem">Effort / Impact Matrix</div>
+      <button class="modal-close" style="position:static" onclick="closeMatrix()">×</button>
+    </div>
+    <div style="font-size:.75rem;color:var(--text-2);margin-bottom:6px">Click a task to move it between quadrants. Priority is updated automatically.</div>
+    <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--text-3);padding:0 2px;"><span>← Low effort · High effort →</span></div>
+    <div class="matrix-grid">
+      <div class="matrix-cell q1" id="mx-q1" ondragover="event.preventDefault()" ondrop="mxDrop(event,'high')">
+        <div class="matrix-cell-label">⚡ Do first — low effort, high impact</div>
+        <div id="mx-q1-tasks"></div>
+      </div>
+      <div class="matrix-cell q2" id="mx-q2" ondragover="event.preventDefault()" ondrop="mxDrop(event,'medium')">
+        <div class="matrix-cell-label">📌 Schedule — high effort, high impact</div>
+        <div id="mx-q2-tasks"></div>
+      </div>
+      <div class="matrix-cell q3" id="mx-q3" ondragover="event.preventDefault()" ondrop="mxDrop(event,'low')">
+        <div class="matrix-cell-label">🔀 Delegate — low effort, low impact</div>
+        <div id="mx-q3-tasks"></div>
+      </div>
+      <div class="matrix-cell q4" id="mx-q4" ondragover="event.preventDefault()" ondrop="mxDrop(event,'none')">
+        <div class="matrix-cell-label">🗑 Drop — high effort, low impact</div>
+        <div id="mx-q4-tasks"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="mxApply()">Apply priorities</button>
+  </div>
+</div>
+
+<!-- MONTHLY REPORT OVERLAY -->
+<div class="modal-overlay" id="monthly-report-overlay">
+  <div class="modal-box" style="max-width:440px">
+    <div class="modal-title" id="monthly-report-title">Monthly Report</div>
+    <button class="modal-close" onclick="closeMonthlyReport()">×</button>
+    <div id="monthly-report-body"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:14px;width:100%" onclick="copyMonthlyReport()">📋 Copy to clipboard</button>
   </div>
 </div>
 
