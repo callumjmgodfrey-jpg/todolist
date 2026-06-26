@@ -778,11 +778,137 @@
       font-weight:600;
       color:var(--text-muted);
     }
+
+    /* --- ZEN MINIMALIST EXPANSION STYLES --- */
+    
+    /* Organic Washi Paper Texture */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Calligraphy "Enso" Checkbox styling */
+    .task-check {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid var(--border-strong) !important;
+      border-radius: 50% !important;
+      outline: none;
+      cursor: pointer;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s ease;
+      background: transparent !important;
+      flex-shrink: 0;
+    }
+    .task-check:hover {
+      border-color: var(--accent) !important;
+    }
+    .task-check::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      border-right-color: transparent !important; /* Imperfect crescent brush stroke */
+      opacity: 0;
+      transform: scale(0.5) rotate(-45deg);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease;
+    }
+    .task-check:checked {
+      border-color: var(--accent) !important;
+    }
+    .task-check:checked::after {
+      opacity: 0.9;
+      transform: scale(1) rotate(315deg);
+    }
+
+    /* Genko Yoshi Traditional Grid Textareas */
+    textarea.genko-yoshi {
+      background-color: var(--surface-2) !important;
+      background-image: linear-gradient(to bottom, rgba(201, 42, 42, 0.08) 1px, transparent 1px) !important;
+      background-size: 100% 24px !important;
+      line-height: 24px !important;
+      padding: 8px 12px !important;
+      background-attachment: local !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 0 !important;
+      font-family: Georgia, serif;
+      font-style: italic;
+    }
+    textarea.genko-yoshi:focus {
+      border-color: var(--border-strong) !important;
+      border-bottom: 1px solid var(--border-strong) !important;
+    }
+
+    /* Washi Scroll Journal styling */
+    .journal-scroll-container {
+      display: flex;
+      gap: var(--space-md);
+      overflow-x: auto;
+      padding: var(--space-sm) 0;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      margin-top: var(--space-md);
+    }
+    .journal-scroll-container::-webkit-scrollbar {
+      height: 3px;
+    }
+    .journal-scroll-container::-webkit-scrollbar-thumb {
+      background-color: var(--border-strong);
+    }
+    .journal-washi-card {
+      flex: 0 0 260px;
+      scroll-snap-align: start;
+      background: var(--surface-2) !important;
+      border: none !important;
+      border-top: 3px solid var(--accent) !important; /* Torii Vermilion top border ribbon */
+      border-radius: 0 !important;
+      padding: var(--space-md) !important;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    /* Zen Garden SVG layout */
+    .zen-garden-container {
+      margin: var(--space-lg) auto;
+      width: 160px;
+      height: 160px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .zen-garden-stone {
+      fill: var(--border-strong);
+      stroke: var(--text-muted);
+      stroke-width: 1;
+      transition: fill 0.3s ease;
+    }
+    [data-theme="dark"] .zen-garden-stone {
+      fill: var(--surface-2);
+      stroke: var(--border);
+    }
   </style>
 </head>
 <body>
 
-<<div id="lock-screen">
+<div id="lock-screen">
   <div class="lock-logo"><span style="color:var(--accent);font-size:2rem;margin-right:6px;vertical-align:middle;">●</span>GoalDo</div>
   <div class="lock-sub">Enter your PIN to continue</div>
   <div class="pin-dots" id="pin-dots">
@@ -878,6 +1004,12 @@
     </div>
   </div>
 
+  <!-- Daily Haiku & Zen Proverb Slip -->
+  <div class="zen-quote-card" id="zen-quote-card" style="border-left: 2px solid var(--accent); padding: var(--space-md) var(--space-lg); margin-bottom: var(--space-xl); font-style: italic; font-size: 0.85rem; color: var(--text-2); background: none; line-height: 1.5; position: relative;">
+    <p id="zen-quote-text" style="margin-bottom: 4px; font-family: Georgia, serif;"></p>
+    <span id="zen-quote-author" style="font-size: 0.75rem; color: var(--text-3); font-weight: 600; display: block; text-align: right;"></span>
+  </div>
+
   <div class="form-card">
     <div class="sec-title" style="margin-bottom:12px">新規任務 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;">New Task</span></div>
     <div class="form-row">
@@ -952,7 +1084,7 @@
   </div>
   <div class="review-card" style="margin-bottom:14px">
     <h4>日誌 <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Daily journal</span></h4>
-    <textarea id="journal-ta" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:.88rem;font-family:inherit;color:var(--text);resize:vertical;min-height:70px;margin-bottom:10px;" placeholder="How did today go? What did you learn?"></textarea>
+    <textarea id="journal-ta" class="genko-yoshi" style="width:100%;resize:vertical;min-height:90px;margin-bottom:10px;" placeholder="How did today go? What did you learn?"></textarea>
     <button class="btn btn-primary btn-sm" onclick="saveJournal()">Save note</button>
     <div id="journal-history" style="margin-top:12px;"></div>
   </div>
@@ -1086,13 +1218,33 @@
   <div class="focus-panel">
     <div class="focus-goal-label" id="focus-goal-lbl"></div>
     <div class="focus-task-name" id="focus-task-nm"></div>
-    <div class="focus-timer-row">
+    
+    <!-- Zen Garden sand circles & stone SVG -->
+    <div class="zen-garden-container">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <!-- Concentric sand circles (Raked Sand) -->
+        <circle cx="80" cy="80" r="70" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
+        <circle cx="80" cy="80" r="55" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
+        <circle cx="80" cy="80" r="40" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
+        <circle cx="80" cy="80" r="25" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
+        
+        <!-- Vermilion Progress Rake Path (Draws itself around the stone) -->
+        <circle id="zen-rake-path" cx="80" cy="80" r="55" fill="none" stroke="var(--accent)" stroke-width="1.5" 
+                stroke-dasharray="345.5" stroke-dashoffset="345.5" transform="rotate(-90 80 80)" stroke-linecap="round" 
+                style="transition: stroke-dashoffset 0.2s linear;" />
+        
+        <!-- Central Zen Stone -->
+        <path class="zen-garden-stone" d="M 72,74 C 68,78 68,84 74,88 C 80,92 88,90 90,84 C 92,78 88,72 80,72 C 76,72 74,72 72,74 Z" />
+      </svg>
+    </div>
+
+    <div class="focus-timer-row" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
       <span style="font-size:.85rem;font-weight:600;color:var(--accent)">🍅 Focus timer</span>
-      <span id="focus-timer-disp" style="font-size:1rem;font-weight:700;color:var(--accent)">25:00</span>
-      <button class="btn btn-primary btn-sm" onclick="startFocusTimer()">Start</button>
+      <span id="focus-timer-disp" style="font-size:1.15rem;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;">25:00</span>
+      <button class="btn btn-primary btn-sm" id="focus-timer-toggle-btn" onclick="startFocusTimer()">Start</button>
     </div>
     <div class="focus-subtasks" id="focus-subtasks"></div>
-    <textarea class="focus-notes" id="focus-notes" placeholder="Notes…" onblur="saveFocusNotes()"></textarea>
+    <textarea class="focus-notes genko-yoshi" id="focus-notes" placeholder="Reflections during focus..." onblur="saveFocusNotes()"></textarea>
     <div class="focus-nav">
       <button onclick="focusNav(-1)">‹ Prev</button>
       <span id="focus-nav-label">1 of 1</span>
@@ -1117,6 +1269,20 @@ const TEMPLATES=[
   {icon:'🎓',title:'Learn a Skill',type:'long',category:'learning',desc:'Consistent daily practice.',tasks:['Practice for 30 minutes','Watch a tutorial','Complete an exercise']},
   {icon:'💼',title:'Career Growth',type:'long',category:'career',desc:'Take intentional steps each week.',tasks:['Update portfolio/CV','Network with 1 person','Apply to a role','Complete a course module']},
   {icon:'🧘',title:'Improve Wellbeing',type:'short',category:'personal',desc:'Daily mental and physical care.',tasks:['Meditate for 10 minutes','Journal one page','Get 8 hours sleep','Go outside for 20 minutes']},
+];
+
+const ZEN_QUOTES = [
+  { text: "The obstacle is the path.", author: "Zen Proverb" },
+  { text: "Do not seek to follow in the footsteps of the wise.\nSeek what they sought.", author: "Matsuo Basho" },
+  { text: "An old silent pond...\nA frog jumps into the pond,\nsplash! Silence again.", author: "Matsuo Basho" },
+  { text: "In the cicada's cry\nNo sign can foretell\nHow soon it must die.", author: "Matsuo Basho" },
+  { text: "The autumn wind\nMore deeply than ever\nPenetrates my heart.", author: "Yosa Buson" },
+  { text: "Knock on the sky and listen to the sound.", author: "Zen Saying" },
+  { text: "Slow down and everything you are chasing\nwill come and catch you.", author: "Zen Proverb" },
+  { text: "Water its own way\nflowing, clear\nin the river bed.", author: "Taneda Santoka" },
+  { text: "Sitting quietly, doing nothing,\nSpring comes, and the grass grows by itself.", author: "Zen Proverb" },
+  { text: "Mind like water.\nFace the mirror of the moment.", author: "Zen Saying" },
+  { text: "One day at a time,\nthis fleeting world\nblossoms.", author: "Kobayashi Issa" }
 ];
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
@@ -1235,8 +1401,16 @@ function renderGoals(){
       const msOpen=expandedGoals.has(g.id);
       const ms=g.milestones||[];
       const msDone=ms.filter(m=>m.done).length;
-      const msSection=msOpen?`<div class="milestones-section inline-details" style="display:block;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;"><div style="font-size:.78rem;font-weight:700;color:var(--text-2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Milestones</div>${ms.map(m=>`<div class="milestone-row"><input type="checkbox" ${m.done?'checked':''} onchange="wToggleMilestone('${esc(g.id)}','${esc(m.id)}')" /><span class="milestone-label ${m.done?'done':''}">${esc(m.title)}</span><button class="ms-del" onclick="wDeleteMilestone('${esc(g.id)}','${esc(m.id)}')">✕</button></div>`).join('')}<div class="ms-add-row"><input id="ms-input-${esc(g.id)}" placeholder="Add milestone…" style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--text);font-size:.85rem;" onkeydown="if(event.key==='Enter')wAddMilestone('${esc(g.id)}')" /><button class="btn btn-ghost btn-sm" onclick="wAddMilestone('${esc(g.id)}')">+ Add</button></div></div>`:'';
-      return `<div class="goal-card list-item ${msOpen?'is-expanded':''}">
+      const msSection=msOpen?`<div class="milestones-section inline-details" style="display:block;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;"><div style="font-size:.78rem;font-weight:700;color:var(--text-2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Milestones</div>${ms.map(m=>`<div class="milestone-row"><input type="checkbox" class="enso-check" ${m.done?'checked':''} onchange="wToggleMilestone('${esc(g.id)}','${esc(m.id)}')" /><span class="milestone-label ${m.done?'done':''}">${esc(m.title)}</span><button class="ms-del" onclick="wDeleteMilestone('${esc(g.id)}','${esc(m.id)}')">✕</button></div>`).join('')}<div class="ms-add-row"><input id="ms-input-${esc(g.id)}" placeholder="Add milestone…" style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--text);font-size:.85rem;" onkeydown="if(event.key==='Enter')wAddMilestone('${esc(g.id)}')" /><button class="btn btn-ghost btn-sm" onclick="wAddMilestone('${esc(g.id)}')">+ Add</button></div></div>`:'';
+      return `<div class="goal-card list-item ${msOpen?'is-expanded':''}" style="position:relative;">
+        ${prog.pct===100?`
+        <div class="hanko-stamp" style="position: absolute; top: 12px; right: 16px; width: 42px; height: 42px; pointer-events: none; transform: rotate(-12deg); opacity: 0.85; z-index: 10;">
+          <svg width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="38" height="38" fill="none" stroke="var(--accent)" stroke-width="2" rx="3" />
+            <rect x="5" y="5" width="32" height="32" fill="none" stroke="var(--accent)" stroke-width="0.75" rx="1.5" />
+            <text x="21" y="27" font-family="'Courier New', monospace, serif" font-weight="900" font-size="18" fill="var(--accent)" text-anchor="middle">成</text>
+          </svg>
+        </div>`:''}
         <div class="list-item-row">
           <div class="goal-body" style="flex:1;min-width:0;">
             <div class="goal-title" style="font-weight:700;font-size:.95rem;margin-bottom:4px;">${esc(g.title)}</div>
@@ -1312,6 +1486,7 @@ window.wToggleTask=id=>{
   const t=state.tasks.find(x=>x.id===id);if(!t)return;
   t.done=!t.done;persist();snapshotToday();
   if(t.done){
+    playZenChime();
     // Check if goal just hit 100%
     if(t.goalId){const p=goalProgress(t.goalId);if(p.pct===100)launchConfetti();}
     // Check if all today's tasks done
@@ -1354,7 +1529,7 @@ function renderTasks(){
       <div class="task-row list-item-row">
         <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
           <span class="drag-handle">⠿</span>
-          <input type="checkbox" class="task-check" ${t.done?'checked':''} onchange="wToggleTask('${esc(t.id)}')" />
+          <input type="checkbox" class="task-check enso-check" ${t.done?'checked':''} onchange="wToggleTask('${esc(t.id)}')" />
           <div class="task-info" style="flex:1;min-width:0;">
             <div class="task-name details-trigger ${t.done?'done-name':''}" onclick="wExpand('${esc(t.id)}')" style="font-weight:600;font-size:.92rem;color:var(--text-main);">${esc(t.name)}</div>
             <div class="task-meta" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px;">
@@ -1374,10 +1549,10 @@ function renderTasks(){
       </div>
       ${isExp?`<div class="task-detail inline-details" style="display:block;background:transparent !important;border-top:none !important;padding:var(--space-sm) 0 var(--space-md) 32px !important;color:var(--text-muted);">
         <div class="task-detail-label" style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 6px;">Subtasks</div>
-        ${t.subtasks.map(s=>`<div class="subtask-row" style="display:flex;align-items:center;gap:8px;padding:4px 0;"><input type="checkbox" class="subtask-check" ${s.done?'checked':''} onchange="wToggleSub('${esc(t.id)}','${esc(s.id)}')" style="accent-color:var(--accent);width:15px;height:15px;" /><span class="subtask-text ${s.done?'done-sub':''}" style="font-size:.85rem;flex:1;${s.done?'text-decoration:line-through;color:var(--text-3);':''}">${esc(s.text)}</span><button class="del-sub-btn" onclick="wDeleteSub('${esc(t.id)}','${esc(s.id)}')" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:.9rem;">✕</button></div>`).join('')}
+        ${t.subtasks.map(s=>`<div class="subtask-row" style="display:flex;align-items:center;gap:8px;padding:4px 0;"><input type="checkbox" class="subtask-check enso-check" ${s.done?'checked':''} onchange="wToggleSub('${esc(t.id)}','${esc(s.id)}')" style="accent-color:var(--accent);width:15px;height:15px;" /><span class="subtask-text ${s.done?'done-sub':''}" style="font-size:.85rem;flex:1;${s.done?'text-decoration:line-through;color:var(--text-3);':''}">${esc(s.text)}</span><button class="del-sub-btn" onclick="wDeleteSub('${esc(t.id)}','${esc(s.id)}')" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:.9rem;">✕</button></div>`).join('')}
         <div class="add-sub-row" style="display:flex;gap:6px;margin-top:6px;"><input id="sub-input-${esc(t.id)}" placeholder="Add subtask…" style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;color:var(--text);font-size:.83rem;" onkeydown="if(event.key==='Enter')wAddSub('${esc(t.id)}')" /><button class="btn btn-ghost btn-sm" onclick="wAddSub('${esc(t.id)}')">Add</button></div>
         <div class="task-detail-label" style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 6px;">Notes</div>
-        <textarea id="notes-${esc(t.id)}" class="notes-ta" rows="2" style="background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:7px;color:var(--text);font-size:.83rem;font-family:inherit;width:100%;margin-top:6px;" onblur="wSaveNotes('${esc(t.id)}')">${esc(t.notes||'')}</textarea>
+        <textarea id="notes-${esc(t.id)}" class="notes-ta genko-yoshi" rows="2" style="background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:7px;color:var(--text);font-size:.83rem;font-family:inherit;width:100%;margin-top:6px;" onblur="wSaveNotes('${esc(t.id)}')">${esc(t.notes||'')}</textarea>
       </div>`:''}
     </div>`;
   }).join('')+'</div>';
@@ -1424,10 +1599,10 @@ function renderWeekView(){
   const tasks=filterTasks(state.tasks);
   const cols=days.map((date,i)=>{
     const dayTasks=tasks.filter(t=>t.dueDate===date);
-    return`<div class="week-col"><div class="week-col-hdr ${date===today?'today-hdr':''}"><div>${DAY_NAMES[i]}</div><div style="font-size:.65rem">${fmtDate(date)}</div></div><div class="week-col-body" data-date="${date}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="weekDrop(event,'${date}')">${dayTasks.map(t=>`<div class="week-task ${t.done?'week-done':''}" draggable="true" data-id="${esc(t.id)}" ondragstart="weekDragStart(event,'${esc(t.id)}')" onclick="wToggleTask('${esc(t.id)}')">${t.done?'✅':'○'}<span class="week-task-name">${esc(t.name)}</span></div>`).join('')}</div></div>`;
+    return`<div class="week-col"><div class="week-col-hdr ${date===today?'today-hdr':''}"><div>${DAY_NAMES[i]}</div><div style="font-size:.65rem">${fmtDate(date)}</div></div><div class="week-col-body" data-date="${date}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="weekDrop(event,'${date}')">${dayTasks.map(t=>`<div class="week-task ${t.done?'week-done':''}" draggable="true" data-id="${esc(t.id)}" ondragstart="weekDragStart(event,'${esc(t.id)}')" onclick="wToggleTask('${esc(t.id)}')"><input type="checkbox" class="enso-check" ${t.done?'checked':''}/><span class="week-task-name">${esc(t.name)}</span></div>`).join('')}</div></div>`;
   });
   const unscheduled=tasks.filter(t=>!t.dueDate||!days.includes(t.dueDate));
-  el.innerHTML=`<div class="week-nav"><button onclick="weekOffset--;renderTasks()">‹ Prev</button><span style="flex:1;text-align:center">${fmtDate(days[0])} – ${fmtDate(days[6])}</span><button onclick="weekOffset++;renderTasks()">Next ›</button>${weekOffset!==0?`<button onclick="weekOffset=0;renderTasks()">Today</button>`:''}</div><div class="week-grid">${cols.join('')}</div>${unscheduled.length?`<div class="unscheduled-row"><div style="font-size:.78rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em">Unscheduled (${unscheduled.length})</div><div class="unscheduled-grid">${unscheduled.map(t=>`<div class="unsched-task"><input type="checkbox" ${t.done?'checked':''} onchange="wToggleTask('${esc(t.id)}')" /><span>${esc(t.name)}</span></div>`).join('')}</div></div>`:''}`;
+  el.innerHTML=`<div class="week-nav"><button onclick="weekOffset--;renderTasks()">‹ Prev</button><span style="flex:1;text-align:center">${fmtDate(days[0])} – ${fmtDate(days[6])}</span><button onclick="weekOffset++;renderTasks()">Next ›</button>${weekOffset!==0?`<button onclick="weekOffset=0;renderTasks()">Today</button>`:''}</div><div class="week-grid">${cols.join('')}</div>${unscheduled.length?`<div class="unscheduled-row"><div style="font-size:.78rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em">Unscheduled (${unscheduled.length})</div><div class="unscheduled-grid">${unscheduled.map(t=>`<div class="unsched-task"><input type="checkbox" class="enso-check" ${t.done?'checked':''} onchange="wToggleTask('${esc(t.id)}')" /><span>${esc(t.name)}</span></div>`).join('')}</div></div>`:''}`;
 }
 function weekDragStart(e,id){dragMode='reschedule';dragSrc=id;e.dataTransfer.effectAllowed='move';}
 function weekDrop(e,date){e.preventDefault();document.querySelectorAll('.week-col-body').forEach(c=>c.classList.remove('drag-over'));if(!dragSrc)return;const t=state.tasks.find(x=>x.id===dragSrc);if(t){t.dueDate=date;persist();renderTasks();}dragSrc=null;}
@@ -1490,20 +1665,96 @@ function startTimer(taskId,taskName,minutes){
 }
 function tickTimer(){if(timer.paused)return;timer.remaining--;updateTimerDisplay();updateFocusTimerDisplay();if(timer.remaining<=0)completeTimer();}
 function updateTimerDisplay(){const m=Math.floor(timer.remaining/60),s=timer.remaining%60;const str=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;document.getElementById('timer-display').textContent=str;}
-function updateFocusTimerDisplay(){const el=document.getElementById('focus-timer-disp');if(el&&timer.active){const m=Math.floor(timer.remaining/60),s=timer.remaining%60;el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}}
+function updateFocusTimerDisplay(){
+  const el=document.getElementById('focus-timer-disp');
+  const btn = document.getElementById('focus-timer-toggle-btn');
+  if(el){
+    if (timer.active) {
+      const m=Math.floor(timer.remaining/60),s=timer.remaining%60;
+      el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      
+      const rake = document.getElementById('zen-rake-path');
+      if (rake) {
+        const pct = timer.remaining / timer.total;
+        rake.style.strokeDashoffset = 345.5 * pct;
+      }
+      if (btn) btn.textContent = timer.paused ? 'Resume' : 'Pause';
+    } else {
+      el.textContent = '25:00';
+      const rake = document.getElementById('zen-rake-path');
+      if (rake) rake.style.strokeDashoffset = 345.5;
+      if (btn) btn.textContent = 'Start';
+    }
+  }
+}
 function pauseTimer(){timer.paused=!timer.paused;const b=document.getElementById('timer-pause-btn');if(b)b.textContent=timer.paused?'▶':'⏸';}
 function stopTimer(){clearInterval(timer.interval);timer.active=false;timer.paused=false;document.body.classList.remove('timer-on');document.getElementById('timer-bar').classList.remove('visible');}
+
+function playZenChime() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const now = ctx.currentTime;
+    
+    // Singing bowl fundamental and overtones (harmonic ratios)
+    const fundamental = 220; // A3
+    const ratios = [1.0, 1.52, 2.76, 3.44, 4.22];
+    const gains = [0.35, 0.22, 0.15, 0.08, 0.04];
+    const decays = [6.0, 5.0, 3.5, 2.5, 1.5]; // Higher frequencies decay faster
+    
+    // Master gain node
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0, now);
+    masterGain.gain.linearRampToValueAtTime(0.7, now + 0.03); // Soft strike attack
+    masterGain.gain.exponentialRampToValueAtTime(0.001, now + 5.9); // Long resonant decay
+    masterGain.connect(ctx.destination);
+    
+    ratios.forEach((ratio, i) => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(fundamental * ratio, now);
+      
+      // Add organic frequency drift/beating for realistic resonance
+      if (i > 0) {
+        const lfo = ctx.createOscillator();
+        const lfoGain = ctx.createGain();
+        lfo.frequency.value = 1.5 + Math.random() * 2.0; // Slow beating frequency
+        lfoGain.gain.value = 1.2 + Math.random() * 1.5; // Pitch modulation depth
+        
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+        lfo.start(now);
+        lfo.stop(now + 6.0);
+      }
+      
+      gainNode.gain.setValueAtTime(gains[i], now);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + decays[i]);
+      
+      osc.connect(gainNode);
+      gainNode.connect(masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 6.0);
+    });
+  } catch (e) {
+    console.warn("Zen Web Audio chime failed", e);
+  }
+}
+
 function completeTimer(){
   clearInterval(timer.interval);timer.active=false;document.body.classList.remove('timer-on');document.getElementById('timer-bar').classList.remove('visible');
   const today=todayStr();const mins=Math.round(timer.total/60);
   state.pomodoroLog.unshift({id:uid(),taskId:timer.taskId,taskName:timer.taskName,duration:mins,completedAt:new Date().toISOString()});
   const h=state.history[today]||{done:0,total:0,pomodoros:0};h.pomodoros=(h.pomodoros||0)+1;state.history[today]=h;persist();
-  beep();
+  playZenChime();
   if(Notification.permission==='granted')new Notification('Pomodoro complete! 🍅',{body:`${mins}min focus on "${timer.taskName}" done — take a break.`});
   else alert(`Pomodoro complete! "${timer.taskName}" — take a break.`);
   renderReview();
 }
-function beep(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[0,.3,.6].forEach(t=>{const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=660;g.gain.setValueAtTime(.25,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+t+.3);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.3);});}catch(e){}}
+function beep(){playZenChime();}
 
 // ─── FOCUS MODE ───────────────────────────────────────────────────────────────
 let focusTaskList=[];let focusIdx=0;
@@ -1527,12 +1778,31 @@ function renderFocusPanel(){
   document.getElementById('focus-notes').value=t.notes||'';
   const el=document.getElementById('focus-subtasks');
   el.innerHTML=t.subtasks.length?t.subtasks.map(s=>`<div class="focus-subtask"><input type="checkbox" ${s.done?'checked':''} onchange="wToggleSub('${esc(t.id)}','${esc(s.id)}');renderFocusPanel()" /><span class="${s.done?'done-sub':''}">${esc(s.text)}</span></div>`).join(''):'<p style="font-size:.82rem;color:var(--text-3)">No subtasks.</p>';
+  
+  const rake = document.getElementById('zen-rake-path');
+  if (rake) {
+    if (timer.active && timer.taskId === t.id) {
+      const pct = timer.remaining / timer.total;
+      rake.style.strokeDashoffset = 345.5 * pct;
+    } else {
+      rake.style.strokeDashoffset = 345.5;
+    }
+  }
   updateFocusTimerDisplay();
 }
 function focusNav(dir){focusIdx=Math.max(0,Math.min(focusTaskList.length-1,focusIdx+dir));renderFocusPanel();}
 function focusComplete(){const t=focusTaskList[focusIdx];if(t){wToggleTask(t.id);focusTaskList=focusTaskList.filter(x=>x.id!==t.id);if(!focusTaskList.length){closeFocusMode();return;}focusIdx=Math.min(focusIdx,focusTaskList.length-1);renderFocusPanel();}}
 function saveFocusNotes(){const t=focusTaskList[focusIdx];if(t){t.notes=document.getElementById('focus-notes').value;state.tasks.find(x=>x.id===t.id)&&(state.tasks.find(x=>x.id===t.id).notes=t.notes);persist();}}
-function startFocusTimer(){const t=focusTaskList[focusIdx];if(t)startTimer(t.id,t.name);}
+function startFocusTimer(){
+  const t=focusTaskList[focusIdx];
+  if(!t) return;
+  if(timer.active && timer.taskId === t.id) {
+    pauseTimer();
+    updateFocusTimerDisplay();
+  } else {
+    startTimer(t.id, t.name);
+  }
+}
 
 // ─── PRODUCTIVITY SCORE ───────────────────────────────────────────────────────
 function calcProductivityScore(){
@@ -1578,7 +1848,7 @@ function renderJournalHistory(){
   const el=document.getElementById('journal-history');if(!el)return;
   const entries=Object.entries(state.journal).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7);
   if(!entries.length){el.innerHTML='<p style="font-size:.82rem;color:var(--text-3)">No journal entries yet.</p>';return;}
-  el.innerHTML=entries.map(([date,text])=>`<div class="journal-entry"><div class="journal-date">${fmtDate(date)}</div><div>${esc(text)}</div></div>`).join('');
+  el.innerHTML=`<div class="journal-scroll-container">${entries.map(([date,text])=>`<div class="journal-washi-card"><div class="journal-date" style="font-size:.75rem;font-weight:700;color:var(--text-3);margin-bottom:6px;">${fmtDate(date)}</div><div style="font-family: Georgia, serif; font-style: italic;">${esc(text).replace(/\n/g,'<br>')}</div></div>`).join('')}</div>`;
 }
 
 // ─── REVIEW ──────────────────────────────────────────────────────────────────
@@ -1958,8 +2228,19 @@ if(sessionStorage.getItem('gd_unlocked')==='1'){
   document.getElementById('lock-screen').style.display='none';
 }
 
+function displayDailyZenQuote() {
+  const textEl = document.getElementById('zen-quote-text');
+  const authorEl = document.getElementById('zen-quote-author');
+  if (textEl && authorEl) {
+    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    const quote = ZEN_QUOTES[dayOfYear % ZEN_QUOTES.length];
+    textEl.innerHTML = quote.text.replace(/\n/g, '<br>');
+    authorEl.textContent = `— ${quote.author}`;
+  }
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-state=loadState();resetRecurring();snapshotToday();applyTheme(state.settings.theme||'auto');renderAll();
+state=loadState();resetRecurring();snapshotToday();applyTheme(state.settings.theme||'auto');renderAll();displayDailyZenQuote();
 
 const savedNotif=JSON.parse(localStorage.getItem(NOTIF_KEY)||'{}');
 if(savedNotif.time)document.getElementById('notif-time').value=savedNotif.time;
