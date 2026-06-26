@@ -1669,25 +1669,7 @@
 </div>
 
 <!-- FAB -->
-<button id="fab" title="Quick add" onclick="openQuickAdd()">+</button>
-
-<!-- QUICK ADD MODAL -->
-<div class="modal-overlay" id="qa-overlay">
-  <div class="modal-box">
-    <div class="modal-title">Quick Add Task</div>
-    <button class="modal-close" onclick="closeQuickAdd()">×</button>
-    <div class="form-group" style="margin-bottom:10px"><label>Task Name</label><input type="text" id="qa-name" placeholder="What needs doing?" /></div>
-    <div class="form-row">
-      <div class="form-group"><label>Goal</label><select id="qa-goal"><option value="">— No goal —</option></select></div>
-      <div class="form-group"><label>Due Date</label><input type="date" id="qa-due" /></div>
-      <div class="form-group"><label>Priority</label><select id="qa-priority"><option value="none">— None</option><option value="high">🔴 High</option><option value="medium">🟡 Medium</option><option value="low">🔵 Low</option></select></div>
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-ghost" onclick="closeQuickAdd()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveQuickAdd()">Add Task</button>
-    </div>
-  </div>
-</div>
+<button id="fab" title="Add task" onclick="openAddTask()">+</button>
 
 <!-- TEMPLATE MODAL -->
 <div class="modal-overlay" id="tpl-overlay">
@@ -2644,7 +2626,7 @@ function runSearch(q){
 function refreshGoalDrop(){
   const active=state.goals.filter(g=>!g.archived);
   const opts='<option value="">— No goal —</option>'+active.map(g=>`<option value="${esc(g.id)}">${esc(g.title)}</option>`).join('');
-  ['t-goal','qa-goal'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+  ['t-goal'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
   const hg=document.getElementById('h-goal');if(hg)hg.innerHTML='<option value="">— None —</option>'+active.filter(g=>g.mode==='ongoing').map(g=>`<option value="${esc(g.id)}">${esc(g.title)}</option>`).join('');
 }
 
@@ -2657,9 +2639,18 @@ function closeTemplates(){document.getElementById('tpl-overlay').classList.remov
 function applyTemplate(i){const tpl=TEMPLATES[i];closeTemplates();document.getElementById('g-title').value=tpl.title;document.getElementById('g-type').value=tpl.type;document.getElementById('g-cat').value=tpl.category;document.getElementById('g-desc').value=tpl.desc;pendingTplTasks=tpl.tasks;switchTab('goals');document.getElementById('g-title').focus();}
 
 // ─── QUICK ADD ────────────────────────────────────────────────────────────────
-function openQuickAdd(){refreshGoalDrop();document.getElementById('qa-overlay').classList.add('open');setTimeout(()=>document.getElementById('qa-name').focus(),50);}
-function closeQuickAdd(){document.getElementById('qa-overlay').classList.remove('open');document.getElementById('qa-name').value='';document.getElementById('qa-due').value='';document.getElementById('qa-priority').value='none';}
-function saveQuickAdd(){const name=document.getElementById('qa-name').value.trim();if(!name){document.getElementById('qa-name').focus();return;}addTask({name,goalId:document.getElementById('qa-goal').value,dueDate:document.getElementById('qa-due').value,priority:document.getElementById('qa-priority').value});closeQuickAdd();}
+function openAddTask(){
+  selectTab('tasks');
+  requestAnimationFrame(()=>{
+    const el=document.getElementById('t-name');
+    if(!el)return;
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.focus();
+  });
+}
+function openQuickAdd(){openAddTask();}
+function closeQuickAdd(){}
+function saveQuickAdd(){}
 
 // ─── EXPORT ──────────────────────────────────────────────────────────────────
 function exportCSV(){const rows=[['Task','Goal','Due','Priority','Tags','Estimate(min)','Done']];state.tasks.forEach(t=>{const g=state.goals.find(x=>x.id===t.goalId);rows.push([t.name,g?g.title:'',t.dueDate,t.priority||'none',(t.tags||[]).join(';'),t.estimate||0,t.done?'Yes':'No']);});const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='goal-todo-export.csv';a.click();}
@@ -3294,7 +3285,7 @@ function renderMoodHistory(){
 
 // ─── COMMAND PALETTE ─────────────────────────────────────────────────────────
 const CMD_ACTIONS=[
-  {icon:'➕',label:'Add task',hint:'N',action:()=>openQuickAdd()},
+  {icon:'➕',label:'Add task',hint:'N',action:()=>openAddTask()},
   {icon:'🔍',label:'Search',hint:'/',action:()=>openSearch()},
   {icon:'📊',label:'Go to Dashboard',action:()=>switchTab('dashboard')},
   {icon:'🎯',label:'Go to Goals',action:()=>switchTab('goals')},
@@ -3506,9 +3497,9 @@ function toggleDayPickerFull(val){
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmdPalette();return;}
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;
-  if(e.key==='n'||e.key==='N'){e.preventDefault();openQuickAdd();}
+  if(e.key==='n'||e.key==='N'){e.preventDefault();openAddTask();}
   if(e.key==='/'||e.key==='s'){e.preventDefault();openSearch();}
-  if(e.key==='Escape'){closeQuickAdd();closeSearch();fsQuit();closeMatrix();closeMonthlyReport();closeCmdPalette();closeTimeblock();closeShare();closeWeeklyIntent();closeOverdueDigest();}
+  if(e.key==='Escape'){closeSearch();fsQuit();closeMatrix();closeMonthlyReport();closeCmdPalette();closeTimeblock();closeShare();closeWeeklyIntent();closeOverdueDigest();}
 });
 
 // ─── OLED / THEME ────────────────────────────────────────────────────────────
@@ -3936,13 +3927,12 @@ if(savedNotif.enabled)document.getElementById('notif-status').textContent=`Remin
 document.getElementById('add-goal-btn').addEventListener('click',addGoal);
 document.getElementById('g-title').addEventListener('keydown',e=>{if(e.key==='Enter')addGoal();});
 document.getElementById('t-name').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
-document.getElementById('qa-name').addEventListener('keydown',e=>{if(e.key==='Enter')saveQuickAdd();});
+
 document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch();});
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
 updateApiKeyStatus();
 
 // Backdrop close
-document.getElementById('qa-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeQuickAdd();});
 document.getElementById('tpl-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeTemplates();});
 document.getElementById('search-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSearch();});
 document.getElementById('focus-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeFocusMode();});
