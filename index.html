@@ -1357,6 +1357,10 @@
 
 <!-- TASKS TAB -->
 <section class="tab-panel" id="tab-tasks">
+  <div id="duplicate-task-banner" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:none;align-items:center;justify-content:space-between;gap:10px;">
+    <span style="font-size:.85rem;color:#92400e">⚠️ Duplicate tasks detected</span>
+    <button class="btn btn-sm" onclick="deduplicateTasks()" style="background:#f59e0b;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:.82rem;font-weight:700;cursor:pointer;">🧹 Fix now</button>
+  </div>
   <div class="daily-progress-card" id="daily-progress-card">
     <div class="daily-progress-info">
       <span class="daily-progress-title">🌅 Daily Progress</span>
@@ -2199,6 +2203,8 @@ function tagsHtml(tags){if(!tags||!tags.length)return'';return tags.map(t=>`<spa
 
 function renderTasks(){
   if(taskView==='week'){renderWeekView();return;}
+  const dupBanner=document.getElementById('duplicate-task-banner');
+  if(dupBanner){const names=state.tasks.map(t=>(t.name||'').trim().toLowerCase());const hasDups=names.length!==new Set(names).size;dupBanner.style.display=hasDups?'flex':'none';}
   const el=document.getElementById('tasks-list');
   let tasks=filterTasks(state.tasks);
   tasks=sortedTasks(tasks);
@@ -3359,7 +3365,6 @@ function deduplicateTasks(){
   state.tasks=deduped;
   persist();
   renderAll();
-  alert(`Removed ${removed} duplicate task${removed!==1?'s':''}.`);
 }
 
 // ─── FOCUS SESSION ───────────────────────────────────────────────────────────
