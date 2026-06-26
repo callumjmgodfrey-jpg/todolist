@@ -2147,7 +2147,7 @@ window.wToggleTask=id=>{
     const today=todayStr();const todayTasks=state.tasks.filter(x=>x.dueDate===today);if(todayTasks.length&&todayTasks.every(x=>x.done))launchConfetti();
     maybePromptWin();
   }
-  renderTasks();renderReview();renderGoals();
+  renderTasks();renderReview();renderGoals();renderDashboard();
 };
 
 function toggleOngoingFields(v){const el=document.getElementById('g-ongoing-fields');if(el)el.style.display=v==='ongoing'?'flex':'none';}
