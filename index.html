@@ -2831,7 +2831,7 @@ function renderDashboard(){
   // Overview
   document.getElementById('dash-overview').innerHTML=`
     <div style="text-align:center;padding:8px 0 14px">
-      <div class="dash-big">${pct}%</div>
+      <div class="dash-big" id="dash-pct-num">0%</div>
       <div style="font-size:.8rem;color:var(--text-2)">overall completion</div>
     </div>
     <div class="dash-stat-row"><span>Active goals</span><b>${activeGoals.length}</b></div>
@@ -2840,6 +2840,18 @@ function renderDashboard(){
     <div class="dash-stat-row"><span>Best streak</span><b>${state.habits.length?Math.max(...state.habits.map(h=>habitStreak(h))):0}d 🔥</b></div>
     <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%" onclick="openWeeklyReview()">📋 Start weekly review</button>
   `;
+  // Animate count-up
+  (()=>{
+    const el=document.getElementById('dash-pct-num');if(!el)return;
+    const duration=600,start=performance.now();
+    function tick(now){
+      const p=Math.min((now-start)/duration,1);
+      const ease=1-Math.pow(1-p,3);
+      el.textContent=Math.round(ease*pct)+'%';
+      if(p<1)requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
 
   // Goals by category
   const catCounts={};
