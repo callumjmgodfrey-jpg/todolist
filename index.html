@@ -2896,7 +2896,7 @@ function renderDashboard(){
   document.getElementById('dash-today-tasks').innerHTML=suggested.length
     ? suggested.map((t,i)=>{
         const over=isOverdue(t);
-        return`<div class="today-task-row">
+        return`<div class="today-task-row" data-id="${esc(t.id)}" style="overflow:hidden;position:relative;">
           <div class="today-task-order${over&&!t.done?' overdue':''}">${t.done?'✓':i+1}</div>
           <div style="flex:1;min-width:0;">
             <div class="today-task-name${t.done?' done-name':''}">${esc(t.name)}</div>
@@ -2929,6 +2929,7 @@ function renderDashboard(){
   document.getElementById('dash-time').innerHTML=`<div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin-bottom:10px">${fmtMins(weekMins)} this week</div>`+
     (topTimed.length?topTimed.map(t=>`<div class="dash-stat-row"><span>${esc(t.name)}</span><b>${fmtMins(totalLogged(t))}</b></div>`).join(''):'<p style="font-size:.82rem;color:var(--text-3)">No time logged yet. Use the ⏱ button on tasks.</p>');
   renderSchedule();
+  initDashSwipe();
 }
 
 // ─── UNDO SYSTEM ─────────────────────────────────────────────────────────────
@@ -3671,6 +3672,27 @@ function initSwipe(){
       el.style.transition='transform .2s ease';
       if(dx>60){wToggleTask(id);}
       else if(dx<-60){if(confirm('Delete task?'))wDeleteTask(id);}
+      else el.style.transform='';
+    });
+  });
+}
+
+function initDashSwipe(){
+  document.querySelectorAll('#dash-today-tasks .today-task-row').forEach(el=>{
+    let startX=0,dx=0;
+    const id=el.dataset.id;
+    el.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;dx=0;el.style.transition='none';},{passive:true});
+    el.addEventListener('touchmove',e=>{
+      dx=e.touches[0].clientX-startX;
+      const clamped=Math.max(-80,Math.min(80,dx));
+      el.style.transform=`translateX(${clamped}px)`;
+      el.style.background=dx>20?'rgba(34,197,94,.15)':dx<-20?'rgba(239,68,68,.1)':'';
+    },{passive:true});
+    el.addEventListener('touchend',()=>{
+      el.style.transition='transform .2s ease';
+      el.style.background='';
+      if(dx>60){el.style.transform='';wToggleTask(id);}
+      else if(dx<-60){el.style.transform='';if(confirm('Delete task?'))wDeleteTask(id);}
       else el.style.transform='';
     });
   });
