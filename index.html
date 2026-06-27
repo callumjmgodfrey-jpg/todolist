@@ -2820,6 +2820,7 @@ window.wApplySuggestedOrder=()=>{
 };
 
 // ─── DASHBOARD ───────────────────────────────────────────────────────────────
+let _lastDashPct=-1;
 function renderDashboard(){
   const today=new Date();const todayS=todayStr();
   const activeGoals=state.goals.filter(g=>!g.archived);
@@ -2840,18 +2841,23 @@ function renderDashboard(){
     <div class="dash-stat-row"><span>Best streak</span><b>${state.habits.length?Math.max(...state.habits.map(h=>habitStreak(h))):0}d 🔥</b></div>
     <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%" onclick="openWeeklyReview()">📋 Start weekly review</button>
   `;
-  // Animate count-up
-  (()=>{
-    const el=document.getElementById('dash-pct-num');if(!el)return;
-    const duration=600,start=performance.now();
-    function tick(now){
-      const p=Math.min((now-start)/duration,1);
-      const ease=1-Math.pow(1-p,3);
-      el.textContent=Math.round(ease*pct)+'%';
-      if(p<1)requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  })();
+  // Animate count-up only when the value changes
+  if(pct!==_lastDashPct){
+    _lastDashPct=pct;
+    (()=>{
+      const el=document.getElementById('dash-pct-num');if(!el)return;
+      const duration=600,start=performance.now();
+      function tick(now){
+        const p=Math.min((now-start)/duration,1);
+        const ease=1-Math.pow(1-p,3);
+        el.textContent=Math.round(ease*pct)+'%';
+        if(p<1)requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    })();
+  } else {
+    const el=document.getElementById('dash-pct-num');if(el)el.textContent=pct+'%';
+  }
 
   // Goals by category
   const catCounts={};
