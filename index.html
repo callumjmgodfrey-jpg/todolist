@@ -2323,7 +2323,7 @@ function initDrag(){
 
 // ─── HABITS ──────────────────────────────────────────────────────────────────
 function addHabit(){const name=document.getElementById('h-name').value.trim();if(!name){alert('Enter a habit name.');return;}const goalId=document.getElementById('h-goal')?.value||'';state.habits.push({id:uid(),name,emoji:document.getElementById('h-emoji').value.trim()||'✅',color:document.getElementById('h-color').value||'#22c55e',goalId,createdAt:todayStr(),log:{}});persist();document.getElementById('h-name').value='';document.getElementById('h-emoji').value='';renderHabits();}
-function habitStreak(h){let s=0;const d=new Date();while(h.log[d.toISOString().slice(0,10)]){s++;d.setDate(d.getDate()-1);}return s;}
+function habitStreak(h){let s=0;const d=new Date();while(h.log[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`]){s++;d.setDate(d.getDate()-1);}return s;}
 window.wToggleHabit=id=>{const h=state.habits.find(x=>x.id===id);if(!h)return;const today=todayStr();if(h.log[today])delete h.log[today];else{h.log[today]=true;if(h.goalId){const g=state.goals.find(x=>x.id===h.goalId);if(g&&g.mode==='ongoing'){g.score=(g.score||0)+1;if(g.target&&g.score===g.target)launchConfetti();persist();}}}persist();const allDone=state.habits.length>0&&state.habits.every(h=>h.log[today]);if(allDone)launchConfetti();renderHabits();};
 window.wDeleteHabit=id=>{if(!confirm('Delete habit?'))return;state.habits=state.habits.filter(x=>x.id!==id);persist();renderHabits();};
 
@@ -2674,6 +2674,7 @@ function switchTab(tab){
   const labelEl = document.getElementById('active-tab-text');
   if(labelEl&&labelMap[tab])labelEl.textContent=labelMap[tab];
 
+  if(tab!=='dashboard')_lastDashPct=-1;
   if(tab==='review')renderReview();
   if(tab==='ai')updateApiKeyStatus();
   if(tab==='dashboard')renderDashboard();
